@@ -8,18 +8,6 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Sky palette */
-  --sky-top:    #f5c842;
-  --sky-mid:    #f0974a;
-  --sky-btm:    #e8705c;
-
-  /* Hill palette */
-  --hill-far:   #7db87a;
-  --hill-mid:   #5a9e58;
-  --hill-near:  #3d7a3c;
-  --hill-front: #2a5c2a;
-
-  /* Accent & UI */
   --gold:       #f5c842;
   --gold-dark:  #c8960a;
   --warm-white: #fdf8ee;
@@ -33,6 +21,7 @@
   --radius-lg:  24px;
 
   --font: 'Nunito', system-ui, -apple-system, sans-serif;
+  --font-pixel: 'Press Start 2P', monospace;
 }
 
 html { scroll-behavior: smooth; }
@@ -48,7 +37,7 @@ body {
 a { color: inherit; text-decoration: none; }
 
 /* =========================================================
-   HERO
+   HERO — GBA Pixel Art Canvas
    ========================================================= */
 .hero {
   position: relative;
@@ -61,156 +50,50 @@ a { color: inherit; text-decoration: none; }
   justify-content: center;
 }
 
-/* -- Sky -- */
-.sky {
+/* The canvas renders at 240×160, CSS scales it up pixel-perfect */
+#gba-scene {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    #f5c842 0%,
-    #f0a84a 28%,
-    #e8705c 55%,
-    #c9506e 78%,
-    #8b3a6e 100%
-  );
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges; /* Firefox */
   z-index: 0;
 }
 
-/* Sun glow */
-.sun {
+/* GBA LCD scanlines — every other row darkened slightly */
+.scanlines {
   position: absolute;
-  top: 12%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(80px, 14vw, 140px);
-  height: clamp(80px, 14vw, 140px);
-  border-radius: 50%;
-  background: radial-gradient(circle, #fff8d0 0%, #ffd966 40%, #ffb830 70%, transparent 100%);
-  box-shadow: 0 0 60px 30px rgba(255,210,60,0.35), 0 0 120px 70px rgba(255,170,40,0.18);
-  animation: sunPulse 6s ease-in-out infinite;
-}
-@keyframes sunPulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.88; }
-}
-
-/* Clouds */
-.cloud {
-  position: absolute;
-  background: rgba(255,255,255,0.55);
-  border-radius: 50px;
-  filter: blur(2px);
-}
-.cloud::before, .cloud::after {
-  content: '';
-  position: absolute;
-  background: inherit;
-  border-radius: 50%;
-}
-.cloud-1 {
-  width: 140px; height: 38px;
-  top: 18%; left: 8%;
-  animation: drift 28s linear infinite;
-}
-.cloud-1::before { width: 70px; height: 60px; top: -28px; left: 20px; }
-.cloud-1::after  { width: 55px; height: 45px; top: -20px; left: 60px; }
-
-.cloud-2 {
-  width: 100px; height: 28px;
-  top: 28%; right: 14%;
-  animation: drift 36s linear infinite;
-  opacity: 0.7;
-}
-.cloud-2::before { width: 50px; height: 44px; top: -22px; left: 14px; }
-.cloud-2::after  { width: 40px; height: 34px; top: -16px; left: 44px; }
-
-.cloud-3 {
-  width: 80px; height: 22px;
-  top: 13%; left: 38%;
-  animation: drift 44s linear infinite reverse;
-  opacity: 0.5;
-}
-.cloud-3::before { width: 40px; height: 36px; top: -18px; left: 10px; }
-
-.cloud-4 {
-  width: 60px; height: 18px;
-  top: 34%; left: 62%;
-  animation: drift 52s linear infinite;
-  opacity: 0.45;
-}
-.cloud-4::before { width: 30px; height: 28px; top: -14px; left: 8px; }
-
-@keyframes drift {
-  from { transform: translateX(0); }
-  to   { transform: translateX(100vw); }
-}
-
-/* -- Hills -- */
-.hills {
-  position: absolute;
-  bottom: 0;
-  width: 200%;
-  left: -50%;
-  border-radius: 50% 50% 0 0 / 20% 20% 0 0;
-  animation: hillDrift linear infinite;
-}
-.hills-far {
-  height: 42%;
-  background: var(--hill-far);
-  bottom: 28%;
+  inset: 0;
   z-index: 1;
-  animation-duration: 60s;
-  opacity: 0.85;
-}
-.hills-mid {
-  height: 38%;
-  background: var(--hill-mid);
-  bottom: 14%;
-  z-index: 2;
-  animation-duration: 40s;
-  animation-direction: reverse;
-}
-.hills-near {
-  height: 32%;
-  background: var(--hill-near);
-  bottom: 0;
-  z-index: 4;
-  animation-duration: 24s;
-}
-@keyframes hillDrift {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(25%); }
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.10) 3px,
+    rgba(0, 0, 0, 0.10) 4px
+  );
+  pointer-events: none;
 }
 
-/* -- Llama -- */
-.llama-wrap {
+/* GBA screen vignette — corners darker, slight warmth */
+.gba-vignette {
   position: absolute;
-  bottom: 30%;
-  left: -140px;
-  z-index: 3;
-  animation: llamaWalk 22s linear infinite;
+  inset: 0;
+  z-index: 2;
+  background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(10, 5, 20, 0.55) 100%);
+  pointer-events: none;
 }
-.llama {
-  width: 90px;
-  height: auto;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
-}
-/* Leg animation */
-.leg-fl { transform-origin: 30px 72px; animation: legSwingA 0.5s ease-in-out infinite alternate; }
-.leg-bl { transform-origin: 39px 72px; animation: legSwingB 0.5s ease-in-out infinite alternate; }
-.leg-fr { transform-origin: 51px 72px; animation: legSwingB 0.5s ease-in-out infinite alternate; }
-.leg-br { transform-origin: 60px 72px; animation: legSwingA 0.5s ease-in-out infinite alternate; }
-@keyframes legSwingA {
-  from { transform: rotate(-12deg); }
-  to   { transform: rotate(12deg); }
-}
-@keyframes legSwingB {
-  from { transform: rotate(12deg); }
-  to   { transform: rotate(-12deg); }
-}
-@keyframes llamaWalk {
-  from { left: -140px; }
-  to   { left: calc(100vw + 140px); }
+
+/* Pixel font for hero title only */
+.pixel-title {
+  font-family: var(--font-pixel) !important;
+  font-size: clamp(1.6rem, 5vw, 3.2rem) !important;
+  letter-spacing: 0.06em !important;
+  line-height: 1.4 !important;
+  text-shadow:
+    3px 3px 0 rgba(0,0,0,0.4),
+    0 0 30px rgba(255,240,120,0.5) !important;
 }
 
 /* -- Hero content -- */
