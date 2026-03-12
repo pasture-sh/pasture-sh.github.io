@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy — Pasture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    body { background: #faf3e0; }
+    .privacy-wrap { max-width: 680px; margin: 0 auto; padding: 80px 24px; }
+    .privacy-wrap h1 { font-size: 2.4rem; font-weight: 800; margin-bottom: 8px; }
+    .privacy-wrap .updated { font-size: 0.85rem; color: #6b5740; margin-bottom: 48px; }
+    .privacy-wrap h2 { font-size: 1.15rem; font-weight: 700; margin: 36px 0 10px; }
+    .privacy-wrap p, .privacy-wrap li { font-size: 0.97rem; line-height: 1.7; color: #4a3828; }
+    .privacy-wrap ul { padding-left: 20px; margin-top: 8px; }
+    .privacy-wrap a { color: #c8960a; text-decoration: underline; }
+    .back { display: inline-block; margin-bottom: 40px; font-weight: 700; font-size: 0.9rem; color: #3d7a3c; }
+  </style>
+</head>
+<body>
+  <div class="privacy-wrap">
+    <a class="back" href="/">← Back to Pasture</a>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: March 2026</p>
+
+    <h2>The short version</h2>
+    <p>Pasture collects no personal data. Nothing you type, no messages, no model outputs — nothing leaves your devices.</p>
+
+    <h2>What data Pasture handles</h2>
+    <ul>
+      <li>Your chat messages are sent from your iPhone to your own Mac over a local, encrypted peer-to-peer connection. They never touch any server we operate.</li>
+      <li>Conversation history is stored locally on your iPhone using Apple's SwiftData framework.</li>
+      <li>Model downloads are fetched by your Mac directly from Ollama's servers — Pasture acts only as a UI.</li>
+    </ul>
+
+    <h2>What Pasture does not do</h2>
+    <ul>
+      <li>We do not collect analytics or crash reports (yet — if we ever do, it will be opt-in).</li>
+      <li>We do not use advertising SDKs.</li>
+      <li>We do not have a backend that your data flows through.</li>
+      <li>We do not sell or share data — because we don't have any.</li>
+    </ul>
+
+    <h2>Waitlist</h2>
+    <p>If you sign up for the waitlist on this site, your email address is collected solely to notify you when Pasture is available. It is never shared with third parties.</p>
+
+    <h2>Contact</h2>
+    <p>Questions? <a href="mailto:hello@pasture.sh">hello@pasture.sh</a></p>
+  </div>
+</body>
+</html>
