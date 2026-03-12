@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Privacy — Pasture</title>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QEDHMMGWGP"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-QEDHMMGWGP');
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -36,9 +44,12 @@
       <li>Model downloads are fetched by your Mac directly from Ollama's servers — Pasture acts only as a UI.</li>
     </ul>
 
+    <h2>Analytics</h2>
+    <p>This website uses Google Analytics (GA4) to collect anonymous usage data — pages visited and general traffic patterns. No personally identifiable information is collected. You can opt out using the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">Google Analytics opt-out browser add-on</a>.</p>
+
     <h2>What Pasture does not do</h2>
     <ul>
-      <li>We do not collect analytics or crash reports (yet — if we ever do, it will be opt-in).</li>
+      <li>We do not collect analytics or crash reports inside the app (yet — if we ever do, it will be opt-in).</li>
       <li>We do not use advertising SDKs.</li>
       <li>We do not have a backend that your data flows through.</li>
       <li>We do not sell or share data — because we don't have any.</li>
