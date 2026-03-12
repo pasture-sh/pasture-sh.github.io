@@ -1,11 +1,8 @@
 /* =========================================================
    Pasture — GBA Pixel Art Scene
-   Canvas renders at 240×160 (GBA native resolution).
-   CSS scales it up with image-rendering: pixelated for
-   authentic chunky-pixel look.
-
-   Aesthetic: Pokémon Emerald ending credits — layered
-   rolling hills, golden-hour dusk sky, wandering llama.
+   Pokémon Emerald ending credits aesthetic:
+   wide cerulean sky · water horizon · jagged grass · llama
+   240×160 native GBA resolution, scaled up via CSS.
    ========================================================= */
 
 (function () {
@@ -17,162 +14,104 @@
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
 
-  // --- Virtual resolution (GBA native) ---
-  const W = 240;
-  const H = 160;
+  const W = 240, H = 160;
   canvas.width  = W;
   canvas.height = H;
 
   // =========================================================
-  // Palette — warm Pokémon Emerald dusk
+  // Scene layout (Y coordinates in canvas pixels)
+  // Sky:        0  → WATER_Y        (~55% of H)
+  // Water:      WATER_Y → GRASS_Y   (~8% of H)
+  // Grass edge: GRASS_Y → GROUND_Y  (~6% of H — jagged spikes)
+  // Ground:     GROUND_Y → H        (~37% of H — flat fill)
   // =========================================================
+  const WATER_Y  = 88;   // sky → water
+  const GRASS_Y  = 101;  // water → grass spike zone
+  const GROUND_Y = 112;  // flat grass starts here
 
-  // Sky: horizontal color bands, top → bottom
-  const SKY_BANDS = [
-    { y:  0, col: '#fce860' }, // bright gold
-    { y: 14, col: '#f8b838' }, // amber
-    { y: 28, col: '#f09030' }, // orange
-    { y: 42, col: '#e86840' }, // red-orange
-    { y: 56, col: '#d04858' }, // coral
-    { y: 70, col: '#a03470' }, // rose
-    { y: 82, col: '#6c2478' }, // purple
-    { y: 94, col: '#3c1460' }, // deep indigo
+  // =========================================================
+  // Palette — Pokémon Emerald daytime
+  // =========================================================
+  const SKY_TOP   = '#5BBCD6';
+  const SKY_HOR   = '#7ECFE0';   // lighter near horizon
+  const WATER     = '#4A7FC1';
+  const WATER_MID = '#5A9AD4';   // shimmer highlight row
+  const CLOUD_W   = '#FFFFFF';
+  const CLOUD_LAV = '#E8DFF5';
+  const CLOUD_SHD = '#C4B4E8';
+  const GRASS_TIP = '#2D5A0E';   // dark spike tips
+  const GRASS_MID_COL = '#4A9A1E';
+  const GRASS_BRT = '#6DCB3A';   // bright top of ground
+  const GRASS_FLT = '#4A9A1E';   // mid flat ground
+  const GRASS_DRK = '#3A7A14';   // lower flat ground
+
+  // =========================================================
+  // Clouds — four, placed in lower half of sky
+  // Each: ox (base x, loops), y, w, h, spd (drift speed px/s)
+  // =========================================================
+  const CLOUD_DEFS = [
+    { ox:  10, y: 52, w: 46, h: 18, spd: 6  },
+    { ox:  85, y: 44, w: 60, h: 20, spd: 4  },
+    { ox: 165, y: 58, w: 38, h: 14, spd: 7  },
+    { ox: 215, y: 50, w: 28, h: 12, spd: 5  },
   ];
 
-  // Hill layers: far (pale, warm) → near (dark, cool)
-  const HILL_COL = [
-    '#a0d060', // 0 far — sunlit pale green
-    '#72b048', // 1
-    '#4e9038', // 2
-    '#307028', // 3
-    '#1c4c18', // 4 near — dark forest
-  ];
-
-  // Tree colours per hill layer
-  const TREE_COL = ['#286828', '#205820', '#185018', '#104010', '#0c3010'];
-  const TRUNK_COL = '#2c1008';
-
-  // =========================================================
-  // Hill geometry — sine-wave combo for organic rolls
-  // =========================================================
-  // Each layer: { base (0‒1 of H), amp, freq, phase, speed }
-  const LAYERS = [
-    { base: 0.60, amp:  7, freq: 0.013, phase: 0.00, spd: 0.06 },
-    { base: 0.67, amp: 10, freq: 0.017, phase: 1.80, spd: 0.11 },
-    { base: 0.74, amp: 12, freq: 0.022, phase: 0.70, spd: 0.18 },
-    { base: 0.82, amp:  9, freq: 0.028, phase: 3.20, spd: 0.28 },
-    { base: 0.90, amp:  7, freq: 0.016, phase: 1.10, spd: 0.42 },
-  ];
-
-  function hillY(layer, x, t) {
-    const s = x * layer.freq + layer.phase + t * layer.spd;
-    return Math.round(H * layer.base + layer.amp * (Math.sin(s) + 0.55 * Math.sin(s * 1.73 + 0.4)));
-  }
-
-  // =========================================================
-  // Clouds — blocky pixel-art rectangles
-  // =========================================================
-  const CLOUDS = [
-    { ox: 18,  y: 14, w: 34, h: 9,  spd: 0.20 },
-    { ox: 130, y:  8, w: 24, h: 7,  spd: 0.14 },
-    { ox: 72,  y: 26, w: 18, h: 6,  spd: 0.26 },
-    { ox: 195, y: 18, w: 16, h: 5,  spd: 0.18 },
-  ];
-
+  // Draw one GBA-style chunky cloud at canvas position (cx, cy)
   function drawCloud(cx, cy, w, h) {
-    ctx.fillStyle = '#f8f0d0';
     cx = Math.floor(cx);
     cy = Math.floor(cy);
-    // Base rectangle
-    ctx.fillRect(cx,           cy + 3,           w,            h - 3);
+
+    // Bottom shadow band
+    ctx.fillStyle = CLOUD_SHD;
+    ctx.fillRect(cx + 4,             cy + h - 3, w - 8,            3);
+
+    // Lavender mid-body
+    ctx.fillStyle = CLOUD_LAV;
+    ctx.fillRect(cx + 2,             cy + 5,     w - 4,            h - 5);
+
+    // White bumps — left, centre-left, centre-right
+    ctx.fillStyle = CLOUD_W;
     // Left bump
-    ctx.fillRect(cx + 3,       cy,               Math.ceil(w * 0.42), h - 2);
+    ctx.fillRect(cx + 4,             cy + 2,     Math.ceil(w*0.28), h - 4);
+    // Centre bump (tallest)
+    ctx.fillRect(cx + Math.floor(w*0.28), cy,    Math.ceil(w*0.34), h - 2);
     // Right bump
-    ctx.fillRect(cx + Math.floor(w * 0.40), cy + 2, Math.ceil(w * 0.32), h - 4);
+    ctx.fillRect(cx + Math.floor(w*0.60), cy + 3, Math.ceil(w*0.26), h - 5);
+
+    // Top highlight pixel row on tallest bump
+    ctx.fillStyle = CLOUD_W;
+    ctx.fillRect(cx + Math.floor(w*0.30), cy, Math.ceil(w*0.28), 1);
   }
 
   // =========================================================
-  // Sun — pixel circle with dithered glow halo
+  // Grass spike edge — pre-generated, deterministic
   // =========================================================
-  const SUN_X = 168, SUN_Y = 22, SUN_R = 10;
+  // Seeded LCG so the pattern is consistent across frames
+  let _rng = 31337;
+  function rand() {
+    _rng = (_rng * 1664525 + 1013904223) & 0x7fffffff;
+    return _rng / 0x7fffffff;
+  }
 
-  function drawSun() {
-    // Dithered halo rings
-    for (let ring = SUN_R + 1; ring <= SUN_R + 8; ring++) {
-      const frac = (SUN_R + 8 - ring) / 8; // 1 at inner edge, 0 at outer
-      ctx.fillStyle = ring <= SUN_R + 4 ? '#f8e040' : '#f4b820';
-      for (let dy = -ring; dy <= ring; dy++) {
-        for (let dx = -ring; dx <= ring; dx++) {
-          const d = Math.sqrt(dx * dx + dy * dy);
-          if (d > ring - 0.7 && d < ring + 0.7) {
-            // Checkerboard dither weighted by frac
-            if ((dx + dy + ring) % Math.max(1, Math.round(1 / frac)) === 0) {
-              ctx.fillRect(SUN_X + dx, SUN_Y + dy, 1, 1);
-            }
-          }
-        }
-      }
-    }
-    // Sun body
-    ctx.fillStyle = '#fff8a0';
-    for (let dy = -SUN_R; dy <= SUN_R; dy++) {
-      for (let dx = -SUN_R; dx <= SUN_R; dx++) {
-        if (dx * dx + dy * dy <= SUN_R * SUN_R) {
-          ctx.fillRect(SUN_X + dx, SUN_Y + dy, 1, 1);
-        }
-      }
-    }
-    // Bright pixel centre
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(SUN_X - 3, SUN_Y - 3, 6, 6);
+  // Generate spikes across 2× width for seamless tiling
+  const SPIKES = [];
+  let sx = 0;
+  while (sx < W * 2 + 10) {
+    const sw = 1 + Math.floor(rand() * 3);   // 1–3 px wide
+    const sh = 3 + Math.floor(rand() * 9);   // 3–11 px tall
+    SPIKES.push({ x: sx, w: sw, h: sh });
+    sx += sw + (rand() < 0.3 ? 1 : 0);       // tiny gap occasionally
   }
 
   // =========================================================
-  // Trees — pixel-art triangle + trunk
-  // =========================================================
-  function drawTree(tx, ty, layerIdx) {
-    const sz = Math.max(2, 5 - layerIdx); // farther = smaller
-    // Trunk
-    ctx.fillStyle = TRUNK_COL;
-    ctx.fillRect(tx, ty - sz, 2, sz);
-    // Canopy: triangle using horizontal rows
-    ctx.fillStyle = TREE_COL[layerIdx];
-    for (let row = 0; row < sz * 3; row++) {
-      const hw = Math.ceil(row * 0.55);
-      ctx.fillRect(tx - hw, ty - sz - row, hw * 2 + 2, 1);
-    }
-  }
-
-  // Tree anchor offsets per layer (spread across 2× width for seamless tiling)
-  const TREE_OFFSETS = [
-    [40, 110, 185],        // layer 0 (far)
-    [25, 80, 145, 210],    // layer 1
-    [15, 68, 130, 200],    // layer 2
-    [30, 95, 160],         // layer 3
-    [],                    // layer 4 (none on near ground)
-  ];
-
-  function drawTreesForLayer(layerIdx, t) {
-    const layer = LAYERS[layerIdx];
-    TREE_OFFSETS[layerIdx].forEach(ox => {
-      // Scroll at half the hill scroll speed so they move with terrain
-      const rawX = ox - t * layer.spd * 25;
-      const x = Math.floor(((rawX % (W + 30)) + (W + 30)) % (W + 30));
-      if (x >= W) return;
-      const y = hillY(layer, x, t);
-      drawTree(x, y, layerIdx);
-    });
-  }
-
-  // =========================================================
-  // Llama — procedural pixel art, 2-frame walk
-  // Drawn from bottom of feet upward.
+  // Llama — procedural pixel art, 2-frame right-facing walk
+  // bx, by = top-left corner of 18×26 bounding box
   // =========================================================
   function drawLlama(bx, by, frame) {
-    const B = '#d4a848'; // tan body
-    const D = '#a87830'; // shadow / legs
-    const S = '#7c5420'; // deep shadow / hooves
-    const E = '#1c1008'; // eye
+    const B = '#F5ECD7';   // off-white body
+    const D = '#C4A882';   // darker beige shading
+    const A = '#8B6340';   // brown accent / legs / eye
+    const E = '#2C1A08';   // pupil
 
     function r(x, y, w, h, c) {
       ctx.fillStyle = c;
@@ -183,138 +122,181 @@
       ctx.fillRect(bx + x, by + y, 1, 1);
     }
 
-    // Llama faces right. bx,by = top-left of a 18×26 bounding box.
-    // by + 26 = ground level (feet bottom).
+    // Ears
+    r(9,  0, 2, 3, B);
+    r(12, 0, 2, 4, D);   // right ear, slightly darker
 
-    // --- Ears (top-left of head area) ---
-    r(9, 0, 2, 3, B);   // left ear
-    r(12, 0, 2, 4, B);  // right ear (slightly taller)
+    // Head
+    r(8,  3, 7, 5, B);
+    r(8,  3, 7, 1, D);   // top shading
+    p(13, 5, E);          // pupil
+    p(14, 5, '#FFFFFF');  // eye highlight
 
-    // --- Head ---
-    r(8, 3, 7, 5, B);
-    p(13, 4, E);         // eye
-    p(14, 4, '#ffffff'); // eye highlight (1px)
     // Snout / muzzle
     r(13, 6, 3, 2, D);
-    p(14, 7, S);         // nostril
+    p(14, 7, A);          // nostril
 
-    // --- Neck ---
-    r(9, 8, 4, 5, B);
+    // Neck
+    r(9,  8, 4, 6, B);
+    r(9,  8, 1, 6, D);   // neck left-edge shadow
 
-    // --- Body ---
-    r(1, 12, 13, 5, B);
-    // Belly shadow
-    r(2, 16, 11, 1, D);
+    // Body
+    r(0,  13, 14, 5, B);
+    r(0,  17, 14, 1, D); // belly shadow line
+    r(0,  13, 1,  5, D); // left-edge shadow
+
     // Tail
-    r(0, 13, 2, 3, D);
-    p(0, 12, D);
+    r(0, 14, 2, 3, D);
+    p(0, 13, D);
 
-    // --- Legs (4 legs, 2px wide × 6px tall) ---
-    // Walking: frame 0 = back legs fwd / front legs back
-    //          frame 1 = back legs back / front legs fwd
-    const fwd = frame === 0 ? 1 : 0;  // 1 = shifted 1px down (swing forward)
-    const bck = frame === 0 ? 0 : 1;
+    // Legs — 2 px wide × 7 px tall, 4 legs
+    // Walking: alternating pairs shift 1 px vertically
+    const fwd = frame === 0 ? 0 : 1;
+    const bck = frame === 0 ? 1 : 0;
 
-    // Back-left leg
-    r(2,  18 + bck, 2, 6, D);
-    r(2,  23 + bck, 2, 1, S); // hoof
-    // Back-right leg
-    r(5,  18 + fwd, 2, 6, D);
-    r(5,  23 + fwd, 2, 1, S);
-    // Front-left leg
-    r(10, 18 + fwd, 2, 6, D);
-    r(10, 23 + fwd, 2, 1, S);
-    // Front-right leg
-    r(13, 18 + bck, 2, 6, D);
-    r(13, 23 + bck, 2, 1, S);
+    // Back-left
+    r(2,  18 + bck, 2, 6, A);
+    r(2,  23 + bck, 2, 1, E);  // hoof
+    // Back-right
+    r(5,  18 + fwd, 2, 6, A);
+    r(5,  23 + fwd, 2, 1, E);
+    // Front-left
+    r(10, 18 + fwd, 2, 6, A);
+    r(10, 23 + fwd, 2, 1, E);
+    // Front-right
+    r(13, 18 + bck, 2, 6, A);
+    r(13, 23 + bck, 2, 1, E);
   }
 
   // =========================================================
-  // Sky draw with dithered band transitions
+  // Draw sky — flat cerulean, dithered lighter near horizon
   // =========================================================
   function drawSky() {
-    // Fill solid bands
-    for (let i = 0; i < SKY_BANDS.length; i++) {
-      const y0 = SKY_BANDS[i].y;
-      const y1 = (i + 1 < SKY_BANDS.length) ? SKY_BANDS[i + 1].y : H;
-      ctx.fillStyle = SKY_BANDS[i].col;
-      ctx.fillRect(0, y0, W, y1 - y0);
-    }
-    // Dither 2-row transition at each band boundary
-    for (let i = 0; i < SKY_BANDS.length - 1; i++) {
-      const y   = SKY_BANDS[i + 1].y;
-      const c0  = SKY_BANDS[i].col;
-      const c1  = SKY_BANDS[i + 1].col;
+    // Main sky fill
+    ctx.fillStyle = SKY_TOP;
+    ctx.fillRect(0, 0, W, WATER_Y);
+
+    // Subtle horizon glow: dither SKY_TOP / SKY_HOR in last 10 rows
+    const DITHER_START = WATER_Y - 10;
+    for (let y = DITHER_START; y < WATER_Y; y++) {
+      const progress = (y - DITHER_START) / 10; // 0→1
+      // Checkerboard density increases toward horizon
       for (let x = 0; x < W; x++) {
-        // Row y: checkerboard
-        ctx.fillStyle = ((x + y) % 2 === 0) ? c0 : c1;
-        ctx.fillRect(x, y, 1, 1);
-        // Row y+1: inverted checkerboard
-        ctx.fillStyle = ((x + y) % 2 === 0) ? c1 : c0;
-        ctx.fillRect(x, y + 1, 1, 1);
+        const threshold = Math.round(progress * 2); // 0,1, or 2
+        if ((x + y) % 3 < threshold) {
+          ctx.fillStyle = SKY_HOR;
+          ctx.fillRect(x, y, 1, 1);
+        }
       }
     }
   }
 
   // =========================================================
-  // Hills + trees
+  // Draw water band + shimmer
   // =========================================================
-  function drawHillsAndTrees(t) {
-    // Draw far → near so each layer overdrawing the previous
-    for (let li = 0; li < LAYERS.length; li++) {
-      const layer = LAYERS[li];
-      ctx.fillStyle = HILL_COL[li];
-      for (let x = 0; x < W; x++) {
-        const y = Math.max(0, Math.min(H - 1, hillY(layer, x, t)));
-        ctx.fillRect(x, y, 1, H - y);
-      }
-      // Trees sit on top of this layer's fill,
-      // but will be overdrawn by nearer hills — correct parallax behaviour
-      drawTreesForLayer(li, t);
+  function drawWater() {
+    // Dithered 1-row transition: sky → water at WATER_Y
+    for (let x = 0; x < W; x++) {
+      ctx.fillStyle = (x % 2 === 0) ? SKY_HOR : WATER;
+      ctx.fillRect(x, WATER_Y, 1, 1);
+    }
+
+    // Water body
+    ctx.fillStyle = WATER;
+    ctx.fillRect(0, WATER_Y + 1, W, GRASS_Y - WATER_Y - 2);
+
+    // Shimmer highlight — a band of lighter pixels near vertical midpoint
+    const shimY = Math.floor((WATER_Y + GRASS_Y) / 2);
+    ctx.fillStyle = WATER_MID;
+    for (let x = 0; x < W; x++) {
+      if ((x + shimY) % 3 !== 0) ctx.fillRect(x, shimY, 1, 1);
+    }
+    // Faint second shimmer row
+    ctx.fillStyle = '#8BBCE8';
+    for (let x = 0; x < W; x++) {
+      if ((x + shimY + 1) % 4 === 0) ctx.fillRect(x, shimY + 1, 1, 1);
+    }
+
+    // Dithered 1-row transition: water → grass at GRASS_Y - 1
+    for (let x = 0; x < W; x++) {
+      ctx.fillStyle = ((x + GRASS_Y) % 2 === 0) ? WATER : GRASS_TIP;
+      ctx.fillRect(x, GRASS_Y - 1, 1, 1);
     }
   }
 
   // =========================================================
-  // Main animation loop
+  // Draw grass spikes + flat ground fill
   // =========================================================
-  let t0 = null;
-  let llamaX  = -20;   // logical x in GBA canvas pixels
+  function drawGrass(scrollOff) {
+    // Flat ground fill first (everything from GRASS_Y down)
+    ctx.fillStyle = GRASS_BRT;
+    ctx.fillRect(0, GROUND_Y, W, 4);           // bright top strip
+
+    ctx.fillStyle = GRASS_FLT;
+    ctx.fillRect(0, GROUND_Y + 4, W, 10);     // mid ground
+
+    ctx.fillStyle = GRASS_DRK;
+    ctx.fillRect(0, GROUND_Y + 14, W, H - GROUND_Y - 14); // lower fill
+
+    // Spike edge — drawn from GRASS_Y upward
+    const off = Math.floor(scrollOff) % (W * 2);
+    SPIKES.forEach(spike => {
+      const x = ((spike.x - off) % (W * 2) + W * 2) % (W * 2);
+      if (x >= W) return;
+
+      // Dark tip (top 2px of spike)
+      ctx.fillStyle = GRASS_TIP;
+      ctx.fillRect(x, GRASS_Y - spike.h, spike.w, 2);
+
+      // Mid-green body
+      ctx.fillStyle = GRASS_MID_COL;
+      ctx.fillRect(x, GRASS_Y - spike.h + 2, spike.w, spike.h - 2);
+    });
+  }
+
+  // =========================================================
+  // Animation loop
+  // =========================================================
+  let t0       = null;
+  let llamaX   = -24;
   let legTimer = 0;
   let legFrame = 0;
+  let grassScroll = 0; // grass spikes scroll very slowly
 
   function tick(now) {
     if (!t0) t0 = now;
-    const t = (now - t0) * 0.001; // seconds
+    const elapsed = now - t0;
+    const t = elapsed * 0.001; // seconds
 
     ctx.clearRect(0, 0, W, H);
 
-    // 1. Sky
+    // 1 — Sky
     drawSky();
 
-    // 2. Sun
-    drawSun();
-
-    // 3. Clouds (drift left to right slowly)
-    CLOUDS.forEach(cloud => {
-      const rawX = cloud.ox + t * cloud.spd * 8;
-      const x = ((rawX % (W + cloud.w + 4)) + (W + cloud.w + 4)) % (W + cloud.w + 4) - cloud.w;
+    // 2 — Clouds (drift left)
+    CLOUD_DEFS.forEach(cloud => {
+      const drift = t * cloud.spd;
+      const rawX  = cloud.ox - drift;
+      const x     = ((rawX % (W + cloud.w + 8)) + (W + cloud.w + 8)) % (W + cloud.w + 8) - cloud.w;
       drawCloud(x, cloud.y, cloud.w, cloud.h);
     });
 
-    // 4. Hills & trees
-    drawHillsAndTrees(t);
+    // 3 — Water
+    drawWater();
 
-    // 5. Llama — walks on the near hill (layer 4)
-    llamaX += 0.45;
+    // 4 — Grass (spikes scroll very slowly for subtle ground motion)
+    grassScroll = t * 8; // 8 px/s
+    drawGrass(grassScroll);
+
+    // 5 — Llama
+    llamaX += 0.38;
     if (llamaX > W + 24) llamaX = -24;
 
     legTimer++;
-    if (legTimer >= 10) { legFrame = (legFrame + 1) % 2; legTimer = 0; }
+    if (legTimer >= 11) { legFrame = (legFrame + 1) % 2; legTimer = 0; }
 
-    const nearLayer = LAYERS[4];
-    const safeX     = Math.max(0, Math.min(W - 1, Math.floor(llamaX + 9)));
-    const groundY   = hillY(nearLayer, safeX, t);
-    drawLlama(Math.floor(llamaX), groundY - 26, legFrame);
+    // Feet land on GROUND_Y, sprite is 26px tall → top at GROUND_Y - 26
+    drawLlama(Math.floor(llamaX), GROUND_Y - 26, legFrame);
 
     requestAnimationFrame(tick);
   }

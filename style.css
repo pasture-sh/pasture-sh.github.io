@@ -85,16 +85,7 @@ a { color: inherit; text-decoration: none; }
   pointer-events: none;
 }
 
-/* Pixel font for hero title only */
-.pixel-title {
-  font-family: var(--font-pixel) !important;
-  font-size: clamp(1.6rem, 5vw, 3.2rem) !important;
-  letter-spacing: 0.06em !important;
-  line-height: 1.4 !important;
-  text-shadow:
-    3px 3px 0 rgba(0,0,0,0.4),
-    0 0 30px rgba(255,240,120,0.5) !important;
-}
+/* Pixel font override removed — title stays in Nunito */
 
 /* -- Hero content -- */
 .hero-content {
