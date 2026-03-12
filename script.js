@@ -26,20 +26,38 @@ revealEls.forEach(el => {
   observer.observe(el);
 });
 
-// Waitlist form
-function handleWaitlist(e) {
-  e.preventDefault();
-  const form = e.target;
-  const input = form.querySelector('input');
-  const button = form.querySelector('button');
-  const email = input.value.trim();
-  if (!email) return;
+// Waitlist form — submits to Formspree via fetch, shows inline confirmation
+const waitlistForm = document.querySelector('.waitlist-form');
+if (waitlistForm) {
+  waitlistForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    const input  = waitlistForm.querySelector('input');
+    const button = waitlistForm.querySelector('button');
+    if (!input.value.trim()) return;
 
-  button.textContent = '✓ You\'re on the list!';
-  button.disabled = true;
-  input.disabled = true;
-  button.style.background = '#6db46b';
-  button.style.color = 'white';
+    button.textContent = 'Sending…';
+    button.disabled = true;
+
+    try {
+      const res = await fetch(waitlistForm.action, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: new FormData(waitlistForm),
+      });
+      if (res.ok) {
+        button.textContent = '✓ You\'re on the list!';
+        button.style.background = '#6db46b';
+        button.style.color = 'white';
+        input.disabled = true;
+      } else {
+        button.textContent = 'Try again';
+        button.disabled = false;
+      }
+    } catch {
+      button.textContent = 'Try again';
+      button.disabled = false;
+    }
+  });
 }
 
 // Subtle parallax on hero content on scroll

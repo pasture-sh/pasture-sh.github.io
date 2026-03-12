@@ -181,10 +181,6 @@
     ctx.fillStyle = SKY;
     ctx.fillRect(0, 0, W, H);
 
-    // Horizon edge
-    ctx.fillStyle = SKY_HOR;
-    ctx.fillRect(0, 94, W, 1);
-
     // Clouds (only drawn in sky zone — y < 95)
     CLOUD_DEFS.forEach(cloud => {
       const loop = W + cloud.w + 8;
@@ -208,10 +204,8 @@
     }
 
     // Flat ground — overwrites bottom of near hills
-    ctx.fillStyle = GROUND_SHD;
-    ctx.fillRect(0, GROUND_Y, W, 2);
     ctx.fillStyle = GROUND;
-    ctx.fillRect(0, GROUND_Y + 2, W, H - GROUND_Y - 2);
+    ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
 
     // Llama
     updateLlama();
