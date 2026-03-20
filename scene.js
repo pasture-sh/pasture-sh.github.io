@@ -52,8 +52,13 @@
     return out;
   }
 
-  function hexToRgba(hex, a) {
-    const [r,g,b] = parseHex(hex);
+  function hexToRgba(col, a) {
+    // col may be a hex string OR an 'rgb(r,g,b)' string from lerpColor
+    if (col.charAt(0) !== '#') {
+      const m = col.match(/\d+/g);
+      return `rgba(${m[0]},${m[1]},${m[2]},${a})`;
+    }
+    const [r,g,b] = parseHex(col);
     return `rgba(${r},${g},${b},${a})`;
   }
 
@@ -156,6 +161,8 @@
   // ── Animation loop ────────────────────────────────────────
 
   function tick(now) {
+    requestAnimationFrame(tick); // schedule next frame first — loop never dies
+
     // Poll theme every frame — no MutationObserver timing issues
     const target = isDark() ? 1 : 0;
 
@@ -191,7 +198,6 @@
       }
     }
 
-    requestAnimationFrame(tick);
   }
 
   requestAnimationFrame(tick);
