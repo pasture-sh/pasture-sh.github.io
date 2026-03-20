@@ -8,27 +8,41 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --gold:       #f5c842;
-  --gold-dark:  #c8960a;
-  --warm-white: #fdf8ee;
-  --warm-cream: #faf3e0;
-  --text:       #2c1f0e;
-  --text-muted: #6b5740;
-  --border:     rgba(44,31,14,0.10);
+  /* Brand */
+  --accent:        #D9BC7A;  /* morning accent */
+  --accent-dark:   #b89a4a;
+  --brand-green:   #617F67;  /* morning userBubble */
+
+  /* Light mode (morning palette) */
+  --surface:       #f4f8f5;
+  --surface-alt:   #eaf1ec;
+  --text:          #1e2b21;
+  --text-muted:    #4a6152;
+  --border:        rgba(30,43,33,0.10);
 
   --radius-sm:  8px;
   --radius:     16px;
   --radius-lg:  24px;
 
   --font: 'Nunito', system-ui, -apple-system, sans-serif;
-  --font-pixel: 'Press Start 2P', monospace;
+}
+
+[data-theme="dark"] {
+  --accent:        #D98040;
+  --accent-dark:   #c87030;
+  --brand-green:   #7A5C44;
+  --surface:       #2a2218;
+  --surface-alt:   #221c14;
+  --text:          #f0e8da;
+  --text-muted:    #b8a48a;
+  --border:        rgba(240,232,218,0.10);
 }
 
 html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--font);
-  background: var(--warm-cream);
+  background: var(--surface);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -37,7 +51,81 @@ body {
 a { color: inherit; text-decoration: none; }
 
 /* =========================================================
-   HERO — GBA Pixel Art Canvas
+   TOP NAV
+   ========================================================= */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  pointer-events: none;
+}
+
+.nav-logo {
+  pointer-events: all;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.25);
+  transition: opacity 0.15s;
+}
+.nav-logo:hover { opacity: 0.85; }
+.nav-logo img {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.20);
+}
+
+/* When scrolled out of hero, logo adapts to page background */
+.top-nav.scrolled .nav-logo {
+  color: var(--text);
+  text-shadow: none;
+}
+.top-nav.scrolled .nav-logo img {
+  box-shadow: none;
+}
+
+.theme-toggle {
+  pointer-events: all;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.15s;
+  color: white;
+}
+
+.theme-toggle:hover {
+  background: rgba(255,255,255,0.30);
+  transform: scale(1.08);
+}
+
+/* When scrolled into non-hero sections, darken the button */
+.top-nav.scrolled .theme-toggle {
+  background: var(--surface-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+/* =========================================================
+   HERO — Pasture Environment Canvas
    ========================================================= */
 .hero {
   position: relative;
@@ -51,42 +139,22 @@ a { color: inherit; text-decoration: none; }
   padding-top: 20vh;
 }
 
-/* The canvas renders at 240×160, CSS scales it up pixel-perfect */
-#gba-scene {
+#pasture-scene {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges; /* Firefox */
   z-index: 0;
 }
 
-/* Scanlines — very subtle, just a whisper of texture */
-.scanlines {
+/* Soft radial vignette — keeps text readable */
+.hero-vignette {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 4px,
-    rgba(0, 0, 0, 0.04) 4px,
-    rgba(0, 0, 0, 0.04) 5px
-  );
+  background: radial-gradient(ellipse at 50% 40%, transparent 50%, rgba(0,0,0,0.18) 100%);
   pointer-events: none;
 }
-
-/* Soft vignette — gentle, not dramatic */
-.gba-vignette {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background: radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(0, 20, 10, 0.30) 100%);
-  pointer-events: none;
-}
-
-/* Pixel font override removed — title stays in Nunito */
 
 /* -- Hero content -- */
 .hero-content {
@@ -196,7 +264,7 @@ a { color: inherit; text-decoration: none; }
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gold-dark);
+  color: var(--accent-dark);
   margin-bottom: 12px;
 }
 .section-title {
@@ -212,7 +280,7 @@ a { color: inherit; text-decoration: none; }
    HOW IT WORKS
    ========================================================= */
 .how {
-  background: var(--warm-white);
+  background: var(--surface-alt);
 }
 .steps {
   display: flex;
@@ -245,7 +313,7 @@ a { color: inherit; text-decoration: none; }
 }
 .step-arrow {
   font-size: 1.5rem;
-  color: var(--gold-dark);
+  color: var(--accent-dark);
   opacity: 0.5;
   padding: 0 20px;
   align-self: center;
@@ -261,7 +329,7 @@ a { color: inherit; text-decoration: none; }
    FEATURES
    ========================================================= */
 .features {
-  background: var(--warm-cream);
+  background: var(--surface);
 }
 .feature-grid {
   display: grid;
@@ -269,7 +337,7 @@ a { color: inherit; text-decoration: none; }
   gap: 20px;
 }
 .feature-card {
-  background: var(--warm-white);
+  background: var(--surface-alt);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 28px;
@@ -300,7 +368,7 @@ a { color: inherit; text-decoration: none; }
    REQUIREMENTS
    ========================================================= */
 .requirements {
-  background: var(--warm-white);
+  background: var(--surface-alt);
 }
 .requirements .section-title { margin-bottom: 32px; }
 .req-list {
@@ -318,7 +386,7 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.5;
 }
 .req-list a {
-  color: var(--gold-dark);
+  color: var(--accent-dark);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -340,37 +408,12 @@ a { color: inherit; text-decoration: none; }
   display: flex;
   align-items: center;
 }
-.download-scene {
+#dl-scene {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 0;
-}
-.dl-sky {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, #2a1a4e 0%, #5c3070 40%, #c9506e 75%, #e8705c 100%);
-}
-.dl-hills {
-  position: absolute;
-  bottom: 0;
-  width: 200%;
-  left: -50%;
-  border-radius: 50% 50% 0 0 / 20% 20% 0 0;
-  animation: hillDrift linear infinite;
-}
-.dl-hills-far {
-  height: 50%;
-  background: #2a4a28;
-  bottom: 18%;
-  animation-duration: 70s;
-  opacity: 0.9;
-}
-.dl-hills-near {
-  height: 40%;
-  background: #1a3018;
-  bottom: 0;
-  animation-duration: 30s;
-  animation-direction: reverse;
 }
 .download-content {
   position: relative;
@@ -423,15 +466,15 @@ a { color: inherit; text-decoration: none; }
   padding: 13px 22px;
   border-radius: 100px;
   border: none;
-  background: var(--gold);
-  color: #2c1f0e;
+  background: var(--accent);
+  color: #1e2b21;
   font-family: var(--font);
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
   transition: background 0.15s, transform 0.15s;
 }
-.waitlist-form button:hover { background: #f5d060; transform: translateY(-1px); }
+.waitlist-form button:hover { background: #e6ca8a; transform: translateY(-1px); }
 .dl-small {
   font-size: 0.85rem;
   opacity: 0.6;
@@ -462,18 +505,14 @@ a { color: inherit; text-decoration: none; }
 .btn-dl:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
 .btn-dl-mac { opacity: 0.7; }
 
-@keyframes hillDrift {
-  0%   { transform: translateX(0%); }
-  50%  { transform: translateX(10%); }
-  100% { transform: translateX(0%); }
-}
 
 /* =========================================================
    FOOTER
    ========================================================= */
 .footer {
-  background: var(--text);
-  color: rgba(255,255,255,0.7);
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
   padding: 36px 24px;
 }
 .footer .container { max-width: 1040px; margin: 0 auto; }
@@ -483,12 +522,19 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   flex-wrap: wrap;
   gap: 16px;
-  margin-bottom: 12px;
 }
 .footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 1rem;
   font-weight: 700;
-  color: white;
+  color: var(--text);
+}
+.footer-logo img {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
 }
 .footer-nav {
   display: flex;
@@ -501,6 +547,13 @@ a { color: inherit; text-decoration: none; }
   font-size: 0.82rem;
   opacity: 0.5;
   text-align: center;
+  flex: 1;
+  margin: 0 24px;
+}
+.footer-copy a {
+  opacity: 0.8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* =========================================================

@@ -1,224 +1,218 @@
 /* =========================================================
-   Pasture — Pixel Art Hero Scene
+   Pasture — Environment Scene
+   Theme is polled every rAF frame — no MutationObserver,
+   no event timing races. lerpPalette() always blends the
+   two constant palette objects so parseHex never sees NaN.
    ========================================================= */
 
 (function () {
   'use strict';
 
-  const canvas = document.getElementById('gba-scene');
-  if (!canvas) return;
+  // ── Palettes ──────────────────────────────────────────────
 
-  const ctx = canvas.getContext('2d');
-  ctx.imageSmoothingEnabled = false;
+  const MORNING = {
+    skyTop:      '#BFD8E2',
+    skyBottom:   '#8FB5C1',
+    horizonGlow: '#F7E8C8',
+    farLayer:    '#B8C9A7',
+    midLayer:    '#91A97D',
+    nearLayer:   '#718D63',
+  };
 
-  const W = 240, H = 160;
-  canvas.width  = W;
-  canvas.height = H;
+  const EVENING = {
+    skyTop:      '#5C7A9A',
+    skyBottom:   '#C4905E',
+    horizonGlow: '#F0B040',
+    farLayer:    '#A08E74',
+    midLayer:    '#7D6D52',
+    nearLayer:   '#5B5040',
+  };
 
-  // ── Layout ────────────────────────────────────────────────
-  const FAR_BASE  = 103;
-  const NEAR_BASE = 119;
-  const GROUND_Y  = 130;
+  // ── Color helpers ─────────────────────────────────────────
 
-  // ── Palette ───────────────────────────────────────────────
-  const SKY        = '#5BBCD6';
-  const SKY_HOR    = '#7DD4E8';
-  const HILL_FAR   = '#7DC95E';
-  const HILL_NEAR  = '#5BAF3A';
-  const GROUND     = '#4A9A1E';
-  const GROUND_SHD = '#3D8518';
+  function parseHex(h) {
+    const c = h.replace('#', '');
+    return [parseInt(c.slice(0,2),16), parseInt(c.slice(2,4),16), parseInt(c.slice(4,6),16)];
+  }
 
-  // ── Hills — sine-wave silhouettes ─────────────────────────
-  const FAR_WAVES  = [
-    { amp: 5, freq: 0.020, phase: 0.0 },
-    { amp: 3, freq: 0.034, phase: 1.4 },
-    { amp: 2, freq: 0.051, phase: 3.1 },
+  function lerpColor(a, b, t) {
+    const ca = parseHex(a), cb = parseHex(b);
+    return 'rgb(' +
+      Math.round(ca[0]+(cb[0]-ca[0])*t) + ',' +
+      Math.round(ca[1]+(cb[1]-ca[1])*t) + ',' +
+      Math.round(ca[2]+(cb[2]-ca[2])*t) + ')';
+  }
+
+  // Always blends MORNING → EVENING using raw hex strings
+  function lerpPalette(t) {
+    if (t <= 0) return MORNING;
+    if (t >= 1) return EVENING;
+    const out = {};
+    for (const k of Object.keys(MORNING)) out[k] = lerpColor(MORNING[k], EVENING[k], t);
+    return out;
+  }
+
+  function hexToRgba(hex, a) {
+    const [r,g,b] = parseHex(hex);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  // ── Theme state ───────────────────────────────────────────
+
+  const TRANS_MS  = 420;
+  let themeTarget = 0;   // 0 = morning, 1 = evening (desired)
+  let themeVisual = 0;   // current rendered position [0..1]
+  let transFrom   = 0;   // visual position at transition start
+  let transStart  = -1;  // rAF timestamp when transition began
+
+  function isDark() {
+    return document.documentElement.getAttribute('data-theme') === 'dark';
+  }
+
+  // ── Canvas + context ──────────────────────────────────────
+
+  const heroCanvas = document.getElementById('pasture-scene');
+  const dlCanvas   = document.getElementById('dl-scene');
+  const heroCtx    = heroCanvas ? heroCanvas.getContext('2d') : null;
+  const dlCtx      = dlCanvas   ? dlCanvas.getContext('2d')   : null;
+
+  function syncSize(canvas) {
+    const w = canvas.offsetWidth  | 0;
+    const h = canvas.offsetHeight | 0;
+    if (canvas.width  !== w) canvas.width  = w;
+    if (canvas.height !== h) canvas.height = h;
+    return [w, h];
+  }
+
+  // ── Drawing ───────────────────────────────────────────────
+
+  function drawSky(ctx, w, h, pal) {
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, pal.skyTop);
+    g.addColorStop(1, pal.skyBottom);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  function drawVignette(ctx, w, h) {
+    const top = ctx.createLinearGradient(0, 0, 0, h * 0.35);
+    top.addColorStop(0, 'rgba(0,0,0,0.14)');
+    top.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = top;
+    ctx.fillRect(0, 0, w, h);
+    const bot = ctx.createLinearGradient(0, h * 0.72, 0, h);
+    bot.addColorStop(0, 'rgba(0,0,0,0)');
+    bot.addColorStop(1, 'rgba(0,0,0,0.12)');
+    ctx.fillStyle = bot;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  function drawGlow(ctx, w, h, pal, yFrac) {
+    const cx = w * 0.5, cy = h * yFrac;
+    const rx = w * 0.75, ry = h * 0.18;
+    const g  = ctx.createRadialGradient(cx, cy, 0, cx, cy, rx);
+    g.addColorStop(0,   hexToRgba(pal.horizonGlow, 0.36));
+    g.addColorStop(0.5, hexToRgba(pal.horizonGlow, 0.10));
+    g.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawLayer(ctx, w, h, color, yPos, crestH, baseH, ox) {
+    const ov = w * 0.18, hy = h * yPos, cr = h * crestH;
+    ctx.beginPath();
+    ctx.moveTo(-ov+ox,       hy+cr*0.30);
+    ctx.bezierCurveTo(w*0.08+ox, hy-cr*0.10, w*0.20+ox, hy-cr*0.62, w*0.32+ox, hy-cr*0.58);
+    ctx.bezierCurveTo(w*0.47+ox, hy-cr*0.54, w*0.60+ox, hy+cr*0.06, w*0.72+ox, hy-cr*0.12);
+    ctx.bezierCurveTo(w*0.85+ox, hy-cr*0.28, w*0.97+ox, hy+cr*0.14, w+ov+ox,   hy+cr*0.18);
+    ctx.lineTo(w+ov+ox, h+h*baseH);
+    ctx.lineTo(-ov+ox,  h+h*baseH);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  function renderScene(ctx, w, h, pal, farOff, nearOff, glowY, layers) {
+    drawSky     (ctx, w, h, pal);
+    drawVignette(ctx, w, h);
+    drawGlow    (ctx, w, h, pal, glowY);
+    for (const L of layers) drawLayer(ctx, w, h, pal[L.key], L.y, L.ch, L.bh, L.ox(farOff, nearOff));
+  }
+
+  const HERO_LAYERS = [
+    { key: 'farLayer',  y: 0.60, ch: 0.16, bh: 0.25, ox: (f)  =>  f },
+    { key: 'midLayer',  y: 0.70, ch: 0.18, bh: 0.28, ox: (f,n) => -n * 0.25 },
+    { key: 'nearLayer', y: 0.80, ch: 0.20, bh: 0.31, ox: (f,n) => -n },
   ];
-  const NEAR_WAVES = [
-    { amp: 7, freq: 0.017, phase: 0.7 },
-    { amp: 4, freq: 0.029, phase: 2.3 },
-    { amp: 2, freq: 0.047, phase: 4.0 },
+
+  const DL_LAYERS = [
+    { key: 'farLayer',  y: 0.38, ch: 0.16, bh: 0.55, ox: (f)   =>  f },
+    { key: 'midLayer',  y: 0.52, ch: 0.18, bh: 0.44, ox: (f,n)  => -n * 0.25 },
+    { key: 'nearLayer', y: 0.65, ch: 0.20, bh: 0.35, ox: (f,n)  => -n },
   ];
-
-  function hillY(waves, base, x, offset) {
-    let y = base;
-    for (const w of waves) y += w.amp * Math.sin(x * w.freq + w.phase + offset);
-    return Math.round(y);
-  }
-
-  // ── Clouds ────────────────────────────────────────────────
-  // Fewer, more spread out, upper sky only
-  const CLOUD_DEFS = [
-    { ox:  15, y: 16, w: 58, h: 22, spd: 4.5 },
-    { ox: 140, y: 11, w: 44, h: 18, spd: 3.2 },
-    { ox: 220, y: 20, w: 36, h: 14, spd: 5.8 },
-  ];
-
-  function drawCloud(cx, cy, w, h) {
-    cx = Math.floor(cx); cy = Math.floor(cy);
-    // Shadow base
-    ctx.fillStyle = '#C8BAE8';
-    ctx.fillRect(cx + 5, cy + h - 3, w - 10, 3);
-    // Body
-    ctx.fillStyle = '#EDE6FF';
-    ctx.fillRect(cx + 2, cy + 5, w - 4, h - 6);
-    // White bumps — drawn fully within body so they can't leak outside
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(cx + 5,              cy + 2, Math.ceil(w * 0.28), h - 5);
-    ctx.fillRect(cx + Math.floor(w * 0.30), cy,     Math.ceil(w * 0.34), h - 3);
-    ctx.fillRect(cx + Math.floor(w * 0.64), cy + 4, Math.ceil(w * 0.24), h - 7);
-  }
-
-  // ── Llama ─────────────────────────────────────────────────
-  // Draws facing right; pass flip=true to mirror
-  function drawLlama(bx, by, frame, flip) {
-    const B = '#F5ECD7';
-    const D = '#D4B896';
-    const A = '#8B6340';
-    const E = '#2C1A08';
-
-    if (flip) {
-      ctx.save();
-      ctx.translate(bx + 18, 0);
-      ctx.scale(-1, 1);
-      bx = 0;
-    }
-
-    function r(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(bx+x, by+y, w, h); }
-    function p(x, y, c)        { ctx.fillStyle = c; ctx.fillRect(bx+x, by+y, 1, 1); }
-
-    // Ears
-    r(9,  0, 2, 3, B); r(12, 0, 2, 4, D);
-    // Head
-    r(8,  3, 7, 5, B); r(8, 3, 7, 1, D);
-    p(13, 5, E);        p(14, 4, '#FFFFFF');
-    // Muzzle
-    r(13, 6, 3, 2, D);  p(14, 7, A);
-    // Neck
-    r(9,  8, 4, 6, B);  r(9, 8, 1, 6, D);
-    // Body
-    r(0, 13, 14, 5, B); r(0, 17, 14, 1, D); r(0, 13, 1, 5, D);
-    // Tail
-    r(0, 14, 2, 3, D);
-    // Legs
-    const fwd = frame === 0 ? 0 : 1;
-    const bck = 1 - fwd;
-    r(2,  18+bck, 2, 6, A); r(2,  23+bck, 2, 1, E);
-    r(5,  18+fwd, 2, 6, A); r(5,  23+fwd, 2, 1, E);
-    r(10, 18+fwd, 2, 6, A); r(10, 23+fwd, 2, 1, E);
-    r(13, 18+bck, 2, 6, A); r(13, 23+bck, 2, 1, E);
-
-    if (flip) ctx.restore();
-  }
-
-  // ── Llama state machine ───────────────────────────────────
-  // States: 'walk' | 'graze'
-  // Grazing = stopped, head bobs slowly
-  let llX          = 85;
-  let llVX         = 0.14;
-  let llFaceRight  = true;
-  let llState      = 'walk';
-  let llTimer      = 0;
-  let llDuration   = randDur('walk');
-  let legTimer     = 0;
-  let legFrame     = 0;
-
-  function randDur(state) {
-    // walk: 4–12 s at 60fps ≈ 240–720 frames
-    // graze: 3–9 s ≈ 180–540 frames
-    return state === 'walk'
-      ? 240 + Math.floor(Math.random() * 480)
-      : 180 + Math.floor(Math.random() * 360);
-  }
-
-  function pickNextState() {
-    if (llState === 'graze') {
-      // After grazing, start walking (slight right preference)
-      llState      = 'walk';
-      llFaceRight  = Math.random() > 0.35;
-      llVX         = (0.10 + Math.random() * 0.14) * (llFaceRight ? 1 : -1);
-    } else {
-      // After walking: 40% chance to graze, else change direction or keep going
-      if (Math.random() < 0.4) {
-        llState = 'graze';
-        llVX    = 0;
-      } else {
-        llFaceRight = Math.random() > 0.35;
-        llVX        = (0.10 + Math.random() * 0.14) * (llFaceRight ? 1 : -1);
-      }
-    }
-    llDuration = randDur(llState);
-    llTimer    = 0;
-  }
-
-  function updateLlama() {
-    llTimer++;
-    if (llTimer >= llDuration) pickNextState();
-
-    if (llState === 'walk') {
-      llX += llVX;
-      // Soft wrap — fade out at edges
-      if (llX > W + 30) llX = -30;
-      if (llX < -30)    llX = W + 30;
-
-      // Leg animation
-      legTimer++;
-      if (legTimer >= 13) { legFrame = (legFrame + 1) % 2; legTimer = 0; }
-    }
-    // While grazing, legs stay still (legFrame unchanged)
-  }
 
   // ── Animation loop ────────────────────────────────────────
-  const FAR_SPD  = 0.008;
-  const NEAR_SPD = 0.016;
-  let t0 = null;
+
+  let _dbgFrame = 0;
 
   function tick(now) {
-    if (!t0) t0 = now;
-    const t = (now - t0) * 0.001;
+    try {
+      // Poll theme every frame — no MutationObserver timing issues
+      const target = isDark() ? 1 : 0;
 
-    // Fill entire canvas with sky first — eliminates any white-pixel bleed
-    ctx.fillStyle = SKY;
-    ctx.fillRect(0, 0, W, H);
+      if (target !== themeTarget) {
+        console.log('[Pasture] theme →', target === 1 ? 'evening' : 'morning',
+          '| data-theme attr =', document.documentElement.getAttribute('data-theme'));
+        themeTarget = target;
+        transFrom   = themeVisual;
+        transStart  = now;
+      }
 
-    // Clouds (only drawn in sky zone — y < 95)
-    CLOUD_DEFS.forEach(cloud => {
-      const loop = W + cloud.w + 8;
-      const x    = ((cloud.ox - t * cloud.spd) % loop + loop) % loop - cloud.w;
-      drawCloud(x, cloud.y, cloud.w, cloud.h);
-    });
+      if (transStart >= 0) {
+        const t   = Math.min((now - transStart) / TRANS_MS, 1);
+        themeVisual = transFrom + (themeTarget - transFrom) * t;
+        if (t >= 1) { themeVisual = themeTarget; transStart = -1; }
+      }
 
-    // Far hills — fill from silhouette to canvas bottom
-    // (near hills + ground will overdraw; this guarantees no gaps)
-    ctx.fillStyle = HILL_FAR;
-    for (let x = 0; x < W; x++) {
-      const y = hillY(FAR_WAVES, FAR_BASE, x, t * FAR_SPD);
-      ctx.fillRect(x, y, 1, H - y);
+      // Log state every ~120 frames
+      if (_dbgFrame++ % 120 === 0) {
+        const [w, h] = heroCanvas ? [heroCanvas.offsetWidth, heroCanvas.offsetHeight] : [0, 0];
+        console.log('[Pasture] frame', _dbgFrame,
+          '| themeVisual =', themeVisual.toFixed(3),
+          '| hero', w + '×' + h,
+          '| isDark =', isDark());
+      }
+
+      const pal = lerpPalette(themeVisual);
+
+      if (heroCtx) {
+        const [w, h] = syncSize(heroCanvas);
+        if (w && h) {
+          const f = w * 0.07 * Math.sin(now / 18000 * Math.PI * 2);
+          const n = w * 0.08 * Math.sin(now / 12000 * Math.PI * 2);
+          renderScene(heroCtx, w, h, pal, f, n, 0.62, HERO_LAYERS);
+        } else {
+          console.warn('[Pasture] hero canvas has zero dimensions:', w, h);
+        }
+      }
+
+      if (dlCtx) {
+        const [w, h] = syncSize(dlCanvas);
+        if (w && h) {
+          const f = w * 0.07 * Math.sin(now / 18000 * Math.PI * 2);
+          const n = w * 0.08 * Math.sin(now / 12000 * Math.PI * 2);
+          renderScene(dlCtx, w, h, pal, f, n, 0.42, DL_LAYERS);
+        }
+      }
+    } catch (e) {
+      console.error('[Pasture] tick error:', e);
     }
-
-    // Near hills — same pattern, overwrites far hill in their zone
-    ctx.fillStyle = HILL_NEAR;
-    for (let x = 0; x < W; x++) {
-      const y = hillY(NEAR_WAVES, NEAR_BASE, x, t * NEAR_SPD);
-      ctx.fillRect(x, y, 1, H - y);
-    }
-
-    // Flat ground — overwrites bottom of near hills
-    ctx.fillStyle = GROUND;
-    ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
-
-    // Llama
-    updateLlama();
-
-    // Grazing head bob: offset y by 1px on a slow 1.5s cycle
-    const graze_bob = llState === 'graze'
-      ? Math.round(Math.sin(t * 2.1) * 0.8)
-      : 0;
-
-    drawLlama(Math.floor(llX), GROUND_Y - 26 + graze_bob, legFrame, !llFaceRight);
 
     requestAnimationFrame(tick);
   }
 
   requestAnimationFrame(tick);
+
 })();

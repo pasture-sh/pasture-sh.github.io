@@ -18,30 +18,40 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏞️</text></svg>" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="/images/pasture-icon.png" />
+  <link rel="apple-touch-icon" href="/images/pasture-icon.png" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
+  <!-- ░░ TOP NAV ░░ -->
+  <nav class="top-nav">
+    <a class="nav-logo" href="#">
+      <img src="/images/pasture-icon.png" alt="Pasture" />
+      <span>Pasture</span>
+    </a>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light/dark mode">
+      <!-- Icon swapped by JS -->
+    </button>
+  </nav>
+
   <!-- ░░ HERO ░░ -->
   <section class="hero">
 
-    <!-- GBA pixel art canvas — renders at 240×160, scaled up with image-rendering:pixelated -->
-    <canvas id="gba-scene"></canvas>
+    <!-- Pasture environment background — mirrors the app's actual visual language -->
+    <canvas id="pasture-scene"></canvas>
 
-    <!-- Scanline + screen-edge overlays for that GBA LCD feel -->
-    <div class="scanlines"></div>
-    <div class="gba-vignette"></div>
+    <!-- Soft vignette -->
+    <div class="hero-vignette"></div>
 
     <!-- Hero content -->
     <div class="hero-content">
-      <div class="badge">Coming soon</div>
       <h1 class="hero-title">Pasture</h1>
-      <p class="hero-sub">A beautiful home for your local AI models</p>
+      <p class="hero-sub">Your local AI, wherever you roam.</p>
       <p class="hero-desc">
-        Use Ollama on iOS and macOS without a terminal.<br />
-        No IP addresses, no VPNs, no setup.
+        Run Ollama on your Mac, chat from your iPhone.<br />
+        No terminal needed. Everything stays on your devices.
       </p>
       <div class="cta-row">
         <a class="btn btn-primary" href="#download">
@@ -114,9 +124,9 @@
           <p>Everything stays between your iPhone and your Mac. No cloud, no tokens, no data leaving your home.</p>
         </div>
         <div class="feature-card">
-          <span class="feature-emoji">🎨</span>
+          <span class="feature-emoji">🌅</span>
           <h3>Living environments</h3>
-          <p>Each model family has its own visual world — Mesa for Llama, Alpine for Mistral, Grove for CodeLlama.</p>
+          <p>The app shifts its look with the time of day — morning mist, afternoon clarity, evening warmth, quiet nights.</p>
         </div>
         <div class="feature-card">
           <span class="feature-emoji">🆓</span>
@@ -129,11 +139,11 @@
 
   <!-- ░░ REQUIREMENTS ░░ -->
   <section class="section requirements">
-    <div class="container narrow">
+    <div class="container">
       <p class="section-eyebrow">Requirements</p>
       <h2 class="section-title">What you need</h2>
       <ul class="req-list">
-        <li><span class="req-check">✓</span> A Mac with <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a> installed and running</li>
+        <li><span class="req-check">✓</span> <span>A Mac with <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a> installed and running</span></li>
         <li><span class="req-check">✓</span> iPhone on the same Wi-Fi network</li>
         <li><span class="req-check">✓</span> iOS 17.4 or later · macOS 14 or later</li>
         <li><span class="req-check">✓</span> Both devices signed into the same iCloud account</li>
@@ -143,11 +153,7 @@
 
   <!-- ░░ DOWNLOAD ░░ -->
   <section class="section download" id="download">
-    <div class="download-scene">
-      <div class="dl-sky"></div>
-      <div class="dl-hills dl-hills-far"></div>
-      <div class="dl-hills dl-hills-near"></div>
-    </div>
+    <canvas id="dl-scene"></canvas>
     <div class="container narrow download-content">
       <h2 class="dl-title">Ready to graze?</h2>
       <p class="dl-sub">Pasture is currently in private beta. Join the waitlist and you'll be among the first to get access.</p>
@@ -155,17 +161,6 @@
         <input type="email" name="email" placeholder="your@email.com" required autocomplete="email" />
         <button type="submit">Join waitlist</button>
       </form>
-      <p class="dl-small">Or, if you already have access —</p>
-      <div class="dl-btns">
-        <a class="btn btn-dl" href="#">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-          Get for iPhone
-        </a>
-        <a class="btn btn-dl btn-dl-mac" href="#">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12z"/><path d="M6 8h12v2H6zm0 4h8v2H6z"/></svg>
-          Get Companion for Mac
-        </a>
-      </div>
     </div>
   </section>
 
@@ -173,13 +168,12 @@
   <footer class="footer">
     <div class="container">
       <div class="footer-inner">
-        <span class="footer-logo">🏞️ Pasture</span>
+        <span class="footer-logo"><img src="/images/pasture-icon.png" alt="" />Pasture</span>
+        <p class="footer-copy">Made with love by <a href="https://x.com/amrith" target="_blank" rel="noopener">@amrith</a> using <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a> and <a href="https://github.com/EthanLipnik/Loom" target="_blank" rel="noopener">Loom</a>.</p>
         <nav class="footer-nav">
-          <a href="https://x.com/amrith" target="_blank" rel="noopener">Twitter</a>
           <a href="/privacy">Privacy</a>
         </nav>
       </div>
-      <p class="footer-copy">Made with <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a> and <a href="https://github.com/EthanLipnik/Loom" target="_blank" rel="noopener">Loom</a>. Runs on your own hardware. No subscriptions.</p>
     </div>
   </footer>
 

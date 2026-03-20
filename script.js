@@ -2,6 +2,42 @@
    Pasture — Landing Page Scripts
    ========================================================= */
 
+// ── Theme toggle ─────────────────────────────────────────
+
+const THEME_KEY = 'pasture-theme';
+const html = document.documentElement;
+const toggleBtn = document.getElementById('theme-toggle');
+
+const SUN_ICON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>`;
+const MOON_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+
+function applyTheme(theme) {
+  html.setAttribute('data-theme', theme);
+  if (toggleBtn) {
+    toggleBtn.innerHTML = theme === 'dark' ? SUN_ICON : MOON_ICON;
+    toggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+}
+
+// Default to light; respect saved preference
+const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+applyTheme(savedTheme);
+
+if (toggleBtn) {
+  toggleBtn.addEventListener('click', () => {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  });
+}
+
+// Nav style when scrolled out of hero
+const topNav = document.querySelector('.top-nav');
+window.addEventListener('scroll', () => {
+  if (!topNav) return;
+  topNav.classList.toggle('scrolled', window.scrollY > window.innerHeight * 0.8);
+}, { passive: true });
+
 // Scroll reveal
 const revealEls = document.querySelectorAll(
   '.step, .feature-card, .req-list li, .section-title, .section-eyebrow'
@@ -46,7 +82,7 @@ if (waitlistForm) {
       });
       if (res.ok) {
         button.textContent = '✓ You\'re on the list!';
-        button.style.background = '#6db46b';
+        button.style.background = '#617F67';
         button.style.color = 'white';
         input.disabled = true;
       } else {
