@@ -155,59 +155,40 @@
 
   // ── Animation loop ────────────────────────────────────────
 
-  let _dbgFrame = 0;
-
   function tick(now) {
-    try {
-      // Poll theme every frame — no MutationObserver timing issues
-      const target = isDark() ? 1 : 0;
+    // Poll theme every frame — no MutationObserver timing issues
+    const target = isDark() ? 1 : 0;
 
-      if (target !== themeTarget) {
-        console.log('[Pasture] theme →', target === 1 ? 'evening' : 'morning',
-          '| data-theme attr =', document.documentElement.getAttribute('data-theme'));
-        themeTarget = target;
-        transFrom   = themeVisual;
-        transStart  = now;
+    if (target !== themeTarget) {
+      themeTarget = target;
+      transFrom   = themeVisual;
+      transStart  = now;
+    }
+
+    if (transStart >= 0) {
+      const t   = Math.min((now - transStart) / TRANS_MS, 1);
+      themeVisual = transFrom + (themeTarget - transFrom) * t;
+      if (t >= 1) { themeVisual = themeTarget; transStart = -1; }
+    }
+
+    const pal = lerpPalette(themeVisual);
+
+    if (heroCtx) {
+      const [w, h] = syncSize(heroCanvas);
+      if (w && h) {
+        const f = w * 0.07 * Math.sin(now / 18000 * Math.PI * 2);
+        const n = w * 0.08 * Math.sin(now / 12000 * Math.PI * 2);
+        renderScene(heroCtx, w, h, pal, f, n, 0.62, HERO_LAYERS);
       }
+    }
 
-      if (transStart >= 0) {
-        const t   = Math.min((now - transStart) / TRANS_MS, 1);
-        themeVisual = transFrom + (themeTarget - transFrom) * t;
-        if (t >= 1) { themeVisual = themeTarget; transStart = -1; }
+    if (dlCtx) {
+      const [w, h] = syncSize(dlCanvas);
+      if (w && h) {
+        const f = w * 0.07 * Math.sin(now / 18000 * Math.PI * 2);
+        const n = w * 0.08 * Math.sin(now / 12000 * Math.PI * 2);
+        renderScene(dlCtx, w, h, pal, f, n, 0.42, DL_LAYERS);
       }
-
-      // Log state every ~120 frames
-      if (_dbgFrame++ % 120 === 0) {
-        const [w, h] = heroCanvas ? [heroCanvas.offsetWidth, heroCanvas.offsetHeight] : [0, 0];
-        console.log('[Pasture] frame', _dbgFrame,
-          '| themeVisual =', themeVisual.toFixed(3),
-          '| hero', w + '×' + h,
-          '| isDark =', isDark());
-      }
-
-      const pal = lerpPalette(themeVisual);
-
-      if (heroCtx) {
-        const [w, h] = syncSize(heroCanvas);
-        if (w && h) {
-          const f = w * 0.07 * Math.sin(now / 18000 * Math.PI * 2);
-          const n = w * 0.08 * Math.sin(now / 12000 * Math.PI * 2);
-          renderScene(heroCtx, w, h, pal, f, n, 0.62, HERO_LAYERS);
-        } else {
-          console.warn('[Pasture] hero canvas has zero dimensions:', w, h);
-        }
-      }
-
-      if (dlCtx) {
-        const [w, h] = syncSize(dlCanvas);
-        if (w && h) {
-          const f = w * 0.07 * Math.sin(now / 18000 * Math.PI * 2);
-          const n = w * 0.08 * Math.sin(now / 12000 * Math.PI * 2);
-          renderScene(dlCtx, w, h, pal, f, n, 0.42, DL_LAYERS);
-        }
-      }
-    } catch (e) {
-      console.error('[Pasture] tick error:', e);
     }
 
     requestAnimationFrame(tick);
