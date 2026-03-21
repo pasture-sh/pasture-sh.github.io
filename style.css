@@ -398,6 +398,42 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* =========================================================
+   SCREENSHOTS
+   ========================================================= */
+.screenshots {
+  background: var(--surface);
+  padding-bottom: 0;
+}
+.screenshots .section-title { margin-bottom: 40px; }
+
+.screenshot-strip {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 72px;
+  padding-left: max(24px, calc((100vw - 1040px) / 2));
+  padding-right: max(24px, calc((100vw - 1040px) / 2));
+}
+.screenshot-strip::-webkit-scrollbar { display: none; }
+
+.screenshot {
+  flex-shrink: 0;
+  width: 260px;
+  border-radius: 28px;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.14);
+  scroll-snap-align: center;
+  transition: transform 0.2s;
+}
+.screenshot:hover { transform: translateY(-4px); }
+
+@media (max-width: 480px) {
+  .screenshot { width: 72vw; }
+}
+
+/* =========================================================
    DOWNLOAD
    ========================================================= */
 .download {
