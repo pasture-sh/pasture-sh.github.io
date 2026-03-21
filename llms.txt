@@ -1,0 +1,32 @@
+# Pasture
+
+> Pasture is a beautiful iOS app that lets you chat with local AI models running via Ollama on your Mac — from your iPhone. No terminal, no setup, nothing leaves your devices.
+
+## About
+
+Pasture connects your iPhone to Ollama running on your Mac over your local Wi-Fi network using zero-configuration discovery (Bonjour). Conversations are streamed token-by-token and stay entirely on your own hardware.
+
+The app is free, private by design, and currently in private beta.
+
+## Key features
+
+- Zero-config discovery: your Mac appears by name automatically, no IP addresses needed
+- Full streaming chat with every Ollama model installed on your Mac
+- Model manager: browse, download, and delete Ollama models from your iPhone
+- Fully private: no cloud, no API keys, no data leaving your devices
+- Living environments: the UI shifts its look with the time of day
+- Free, always — no subscription or credits required
+
+## Requirements
+
+- A Mac running Ollama (ollama.com)
+- iPhone on the same Wi-Fi network
+- iOS 17.4 or later, macOS 14 or later
+- Both devices signed into the same iCloud account
+
+## Links
+
+- Homepage: https://pasture.sh
+- Privacy policy: https://pasture.sh/privacy
+- Developer: https://x.com/amrith
+- Built with Ollama (https://ollama.com) and Loom (https://github.com/EthanLipnik/Loom)
