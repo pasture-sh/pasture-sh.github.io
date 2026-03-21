@@ -96,19 +96,12 @@ if (waitlistForm) {
   });
 }
 
-// Subtle parallax on hero content + phone on scroll
+// Subtle parallax on hero content on scroll
 const heroContent = document.querySelector('.hero-content');
-const heroPhone   = document.querySelector('.hero-phone');
 window.addEventListener('scroll', () => {
   const y = window.scrollY;
-  if (y < window.innerHeight) {
-    if (heroContent) {
-      heroContent.style.transform = `translateY(${y * 0.22}px)`;
-      heroContent.style.opacity = 1 - (y / (window.innerHeight * 0.7));
-    }
-    if (heroPhone) {
-      heroPhone.style.transform = `translateY(${y * 0.14}px)`;
-      heroPhone.style.opacity = 1 - (y / (window.innerHeight * 0.8));
-    }
+  if (heroContent && y < window.innerHeight) {
+    heroContent.style.transform = `translateY(${y * 0.22}px)`;
+    heroContent.style.opacity = 1 - (y / (window.innerHeight * 0.7));
   }
 }, { passive: true });
