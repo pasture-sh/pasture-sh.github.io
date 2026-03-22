@@ -31,25 +31,42 @@ if (toggleBtn) {
   });
 }
 
-// Nav style when scrolled out of hero
-const topNav = document.querySelector('.top-nav');
+// ── Scroll: nav + parallax (single listener) ─────────────
+
+const topNav      = document.querySelector('.top-nav');
+const heroContent = document.querySelector('.hero-content');
+const heroPhone   = document.querySelector('.hero-phone');
+
 window.addEventListener('scroll', () => {
-  if (!topNav) return;
-  topNav.classList.toggle('scrolled', window.scrollY > window.innerHeight * 0.8);
+  const y = window.scrollY;
+
+  if (topNav) topNav.classList.toggle('scrolled', y > window.innerHeight * 0.8);
+
+  if (y < window.innerHeight) {
+    if (heroContent) {
+      heroContent.style.transform = `translateY(${y * 0.22}px)`;
+      heroContent.style.opacity = 1 - (y / (window.innerHeight * 0.7));
+    }
+    if (heroPhone) {
+      heroPhone.style.transform = `translateY(${y * 0.14}px)`;
+      heroPhone.style.opacity = 1 - (y / (window.innerHeight * 0.8));
+    }
+  }
 }, { passive: true });
 
-// Scroll reveal
-const revealEls = document.querySelectorAll(
+// ── Scroll reveal ─────────────────────────────────────────
+
+const revealArray = Array.from(document.querySelectorAll(
   '.step, .feature-card, .req-list li, .section-title, .section-eyebrow'
-);
+));
 
 const observer = new IntersectionObserver(
   entries => {
-    entries.forEach((entry, i) => {
+    entries.forEach(entry => {
       if (entry.isIntersecting) {
-        // Stagger children slightly
-        const delay = (i % 6) * 60;
-        setTimeout(() => entry.target.classList.add('visible'), delay);
+        // Use stable DOM index so stagger order is consistent regardless of batch size
+        const i = revealArray.indexOf(entry.target);
+        setTimeout(() => entry.target.classList.add('visible'), (i % 6) * 60);
         observer.unobserve(entry.target);
       }
     });
@@ -57,12 +74,13 @@ const observer = new IntersectionObserver(
   { threshold: 0.12 }
 );
 
-revealEls.forEach(el => {
+revealArray.forEach(el => {
   el.classList.add('reveal');
   observer.observe(el);
 });
 
-// Waitlist form — submits to Formspree via fetch, shows inline confirmation
+// ── Waitlist form ─────────────────────────────────────────
+
 const waitlistForm = document.querySelector('.waitlist-form');
 if (waitlistForm) {
   waitlistForm.addEventListener('submit', async e => {
@@ -96,19 +114,51 @@ if (waitlistForm) {
   });
 }
 
-// Subtle parallax on hero content + phone on scroll
-const heroContent = document.querySelector('.hero-content');
-const heroPhone   = document.querySelector('.hero-phone');
-window.addEventListener('scroll', () => {
-  const y = window.scrollY;
-  if (y < window.innerHeight) {
-    if (heroContent) {
-      heroContent.style.transform = `translateY(${y * 0.22}px)`;
-      heroContent.style.opacity = 1 - (y / (window.innerHeight * 0.7));
-    }
-    if (heroPhone) {
-      heroPhone.style.transform = `translateY(${y * 0.14}px)`;
-      heroPhone.style.opacity = 1 - (y / (window.innerHeight * 0.8));
-    }
+// ── Feature card modals ───────────────────────────────────
+
+const featureModal = document.getElementById('feature-modal');
+
+if (featureModal) {
+  const modalEmoji    = document.getElementById('modal-emoji');
+  const modalTitle    = document.getElementById('modal-title');
+  const modalBody     = document.getElementById('modal-body');
+  const modalClose    = document.getElementById('modal-close');
+  const modalBackdrop = featureModal.querySelector('.feature-modal-backdrop');
+
+  let savedScrollY = 0;
+
+  function openModal(card) {
+    savedScrollY = window.scrollY;
+    modalEmoji.textContent = card.querySelector('.feature-emoji').textContent;
+    modalTitle.textContent = card.querySelector('h3').textContent;
+    modalBody.innerHTML    = card.dataset.detail;
+    featureModal.classList.add('open');
+    // Lock scroll; save position so page doesn't jump to top (iOS Safari fix)
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = `-${savedScrollY}px`;
+    modalClose.focus();
   }
-}, { passive: true });
+
+  function closeModal() {
+    featureModal.classList.remove('open');
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.top = '';
+    // Bypass smooth-scroll so position restores instantly, not with a jarring animation
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, savedScrollY);
+    requestAnimationFrame(() => { document.documentElement.style.scrollBehavior = ''; });
+  }
+
+  document.querySelectorAll('.feature-card').forEach(card => {
+    card.addEventListener('click', () => openModal(card));
+  });
+  modalClose.addEventListener('click', closeModal);
+  modalBackdrop.addEventListener('click', closeModal);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && featureModal.classList.contains('open')) closeModal();
+  });
+}

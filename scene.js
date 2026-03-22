@@ -161,7 +161,8 @@
   // ── Animation loop ────────────────────────────────────────
 
   function tick(now) {
-    requestAnimationFrame(tick); // schedule next frame first — loop never dies
+    requestAnimationFrame(tick);
+    if (document.hidden) return;
 
     // Poll theme every frame — no MutationObserver timing issues
     const target = isDark() ? 1 : 0;

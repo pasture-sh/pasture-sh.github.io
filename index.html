@@ -78,16 +78,16 @@
     <div class="hero-content">
       <h1 class="hero-title">Pasture</h1>
       <p class="hero-sub">Your local AI, wherever you roam.</p>
-      <p class="hero-desc">
-        Run Ollama on your Mac, chat from your iPhone.<br />
-        No terminal needed. Everything stays on your devices.
-      </p>
-      <div class="cta-row">
-        <a class="btn btn-primary" href="#download">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v14M5 9l7 7 7-7"/><path d="M3 20h18"/></svg>
-          Get early access
-        </a>
-        <a class="btn btn-ghost" href="#how">See how it works</a>
+      <p class="hero-desc">Run <a href="https://ollama.com/?ref=pasture.sh" target="_blank" rel="noopener">Ollama</a> on your Mac, chat from your iPhone.</p>
+      <div class="cta-block">
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#download">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v14M5 9l7 7 7-7"/><path d="M3 20h18"/></svg>
+            Get early access
+          </a>
+          <a class="btn btn-ghost" href="#how">See how it works</a>
+        </div>
+        <p class="hero-note">No terminal needed. Everything stays on your devices.</p>
       </div>
     </div>
 
@@ -110,13 +110,13 @@
   <section class="section how" id="how">
     <div class="container">
       <p class="section-eyebrow">How it works</p>
-      <h2 class="section-title">Intuitive, not intimidating.</h2>
+      <h2 class="section-title">Simple on purpose.</h2>
       <div class="steps">
         <div class="step">
           <div class="step-icon">🖥️</div>
           <div class="step-body">
             <h3>Install Pasture for Mac</h3>
-            <p>A tiny menu bar companion that connects your Mac to your local network and lets you manage your local models.</p>
+            <p>Lives in your menu bar. Quiet, out of the way, always on.</p>
           </div>
         </div>
         <div class="step-arrow">→</div>
@@ -124,7 +124,7 @@
           <div class="step-icon">📱</div>
           <div class="step-body">
             <h3>Open Pasture on iPhone</h3>
-            <p>Your Mac appears by name, automatically. Tap once to connect. Remote access is possible with Tailscale.</p>
+            <p>Your Mac is ready to connect automatically. No setup needed.</p>
           </div>
         </div>
         <div class="step-arrow">→</div>
@@ -132,7 +132,7 @@
           <div class="step-icon">💬</div>
           <div class="step-body">
             <h3>Start chatting</h3>
-            <p>Full streaming chat with every model on your Mac. Switch models on the fly. Conversations stay on your devices.</p>
+            <p>Pick a model and start chatting. Everything stays on your devices.</p>
           </div>
         </div>
       </div>
@@ -145,35 +145,41 @@
       <p class="section-eyebrow">Features</p>
       <h2 class="section-title">Everything you need,<br/>nothing you don't.</h2>
       <div class="feature-grid">
-        <div class="feature-card">
+        <div class="feature-card" data-detail="Pasture uses the same Bonjour technology that powers AirDrop. When your iPhone and Mac are on the same Wi-Fi, your Mac appears automatically. No IP addresses, no router settings, no passwords. Just open the app.">
           <span class="feature-emoji">🔍</span>
-          <h3>Zero-config discovery</h3>
-          <p>Uses Bonjour to find your Mac the same way AirDrop does. Same Wi-Fi, instant connection.</p>
+          <h3>Just shows up</h3>
+          <p>Open the iOS app and your Mac is ready to connect. No technical setup needed.</p>
+          <span class="feature-more">Learn more</span>
         </div>
-        <div class="feature-card">
-          <span class="feature-emoji">⚡️</span>
-          <h3>Token-by-token streaming</h3>
-          <p>Responses stream live from Ollama to your phone. No waiting for the full reply.</p>
+        <div class="feature-card" data-detail="&lt;a href=&quot;https://tailscale.com/?ref=pasture.sh&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Tailscale&lt;/a&gt; is a free app that connects your devices over the internet as if they were on the same home network. Install it on your Mac and iPhone, and Pasture can reach your Mac from anywhere. A cafe, a hotel, abroad. Everything stays encrypted. Nothing changes about how you use the app.">
+          <span class="feature-emoji">🌍</span>
+          <h3>Roam freely</h3>
+          <p>Connect to your Mac remotely from any network using Tailscale. Same privacy, same models.</p>
+          <span class="feature-more">Learn more</span>
         </div>
-        <div class="feature-card">
+        <div class="feature-card" data-detail="Browse all the models installed on your Mac, download new ones, and delete the ones you no longer need. All from your iPhone. Pasture shows curated picks like Llama, Gemma, Mistral, and Qwen with plain-English descriptions, or you can pull any model from the Ollama library. No Terminal. No commands.">
           <span class="feature-emoji">🦙</span>
-          <h3>Model manager</h3>
-          <p>Browse, download, and delete Ollama models from your iPhone. No Terminal needed.</p>
+          <h3>Your herd</h3>
+          <p>Download and manage any Ollama model from your iPhone. No Terminal needed.</p>
+          <span class="feature-more">Learn more</span>
         </div>
-        <div class="feature-card">
+        <div class="feature-card" data-detail="Your conversations are stored locally on your iPhone. Your models run entirely on your Mac. Pasture has no servers, no accounts, and no analytics. There is nothing to breach because there is nothing stored anywhere but your own devices.">
           <span class="feature-emoji">🔒</span>
-          <h3>Fully private</h3>
-          <p>Everything stays between your iPhone and your Mac. No cloud, no tokens, no data leaving your home.</p>
+          <h3>Stays home</h3>
+          <p>Everything lives on your iPhone and your Mac. No cloud, no accounts, nothing shared.</p>
+          <span class="feature-more">Learn more</span>
         </div>
-        <div class="feature-card">
+        <div class="feature-card" data-detail="Pasture reads the time of day and shifts its visual atmosphere to match. Morning brings soft light and cool blues. Afternoon is clear and bright. Evening turns warm and golden. It changes slowly, like daylight. You notice it without thinking about it.">
           <span class="feature-emoji">🌅</span>
           <h3>Living environments</h3>
-          <p>The app shifts its look with the time of day — morning mist, afternoon clarity, evening warmth, quiet nights.</p>
+          <p>The look shifts with the time of day. Morning light, afternoon clarity, evening warmth.</p>
+          <span class="feature-more">Learn more</span>
         </div>
-        <div class="feature-card">
+        <div class="feature-card" data-detail="Pasture costs nothing because there is nothing to charge for. You provide the hardware. You run the models. Pasture is just the bridge between your Mac and your iPhone. No in-app purchases, no tiers, no freemium. Free now, free forever.">
           <span class="feature-emoji">🆓</span>
           <h3>Free. Always.</h3>
-          <p>No subscription. No API key. No credits. You already own the Mac doing the inference.</p>
+          <p>No subscription, no API key, no credits. You already own the hardware.</p>
+          <span class="feature-more">Learn more</span>
         </div>
       </div>
     </div>
@@ -185,10 +191,11 @@
       <p class="section-eyebrow">Requirements</p>
       <h2 class="section-title">What you need</h2>
       <ul class="req-list">
-        <li><span class="req-check">✓</span> <span>A Mac with <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a> installed and running</span></li>
+        <li><span class="req-check">✓</span> <span>A Mac with <a href="https://ollama.com/?ref=pasture.sh" target="_blank" rel="noopener">Ollama</a> installed and running</span></li>
         <li><span class="req-check">✓</span> iPhone on the same Wi-Fi network</li>
         <li><span class="req-check">✓</span> iOS 17.4 or later · macOS 14 or later</li>
         <li><span class="req-check">✓</span> Both devices signed into the same iCloud account</li>
+        <li><span class="req-check">✓</span> <span><a href="https://tailscale.com/?ref=pasture.sh" target="_blank" rel="noopener">Tailscale</a> on both devices for remote access (optional)</span></li>
       </ul>
     </div>
   </section>
@@ -200,11 +207,11 @@
       <h2 class="section-title">Designed for<br/>the way you think.</h2>
     </div>
     <div class="screenshot-strip">
-      <img src="/images/screenshot-1.png" alt="Pasture chat view" class="screenshot" />
-      <img src="/images/screenshot-2.png" alt="Pasture model list" class="screenshot" />
-      <img src="/images/screenshot-3.png" alt="Pasture conversation history" class="screenshot" />
-      <img src="/images/screenshot-4.png" alt="Pasture settings" class="screenshot" />
-      <img src="/images/screenshot-5.png" alt="Pasture discovery" class="screenshot" />
+      <img src="/images/screenshot-1.png" alt="Pasture chat view" class="screenshot" loading="lazy" />
+      <img src="/images/screenshot-2.png" alt="Pasture model list" class="screenshot" loading="lazy" />
+      <img src="/images/screenshot-3.png" alt="Pasture conversation history" class="screenshot" loading="lazy" />
+      <img src="/images/screenshot-4.png" alt="Pasture settings" class="screenshot" loading="lazy" />
+      <img src="/images/screenshot-5.png" alt="Pasture discovery" class="screenshot" loading="lazy" />
     </div>
     <!-- iPhone mockup — mobile only -->
     <div class="screenshots-phone" aria-hidden="true">
@@ -238,13 +245,26 @@
     <div class="container">
       <div class="footer-inner">
         <span class="footer-logo"><img src="/images/pasture-icon.png" alt="" />Pasture</span>
-        <p class="footer-copy">Made with love by <a href="https://x.com/amrith" target="_blank" rel="noopener">@amrith</a> using <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a> and <a href="https://github.com/EthanLipnik/Loom" target="_blank" rel="noopener">Loom</a>.</p>
+        <p class="footer-copy">Made with love by <a href="https://x.com/amrith" target="_blank" rel="noopener">@amrith</a> using <a href="https://ollama.com/?ref=pasture.sh" target="_blank" rel="noopener">Ollama</a> and <a href="https://github.com/EthanLipnik/Loom" target="_blank" rel="noopener">Loom</a>.</p>
         <nav class="footer-nav">
           <a href="/privacy">Privacy</a>
         </nav>
       </div>
     </div>
   </footer>
+
+  <!-- ░░ FEATURE MODAL ░░ -->
+  <div id="feature-modal" class="feature-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="feature-modal-backdrop"></div>
+    <div class="feature-modal-box">
+      <div class="feature-modal-header">
+        <span class="feature-modal-emoji" id="modal-emoji"></span>
+        <h3 class="feature-modal-title" id="modal-title"></h3>
+      </div>
+      <p class="feature-modal-body" id="modal-body"></p>
+      <button class="feature-modal-close" id="modal-close" aria-label="Close">Close</button>
+    </div>
+  </div>
 
   <script src="scene.js"></script>
   <script src="script.js"></script>
