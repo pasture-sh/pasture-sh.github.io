@@ -89,9 +89,8 @@ if (betaForm) {
   betaForm.addEventListener('submit', async e => {
     e.preventDefault();
     const button    = betaForm.querySelector('button');
-    const firstName = betaForm.querySelector('[name="firstName"]').value.trim();
-    const email     = betaForm.querySelector('[name="email"]').value.trim();
-    if (!firstName || !email) return;
+    const email = betaForm.querySelector('[name="email"]').value.trim();
+    if (!email) return;
 
     button.textContent = 'Joining…';
     button.disabled = true;
@@ -102,7 +101,7 @@ if (betaForm) {
       const res = await fetch(workerUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, email }),
+        body: JSON.stringify({ email }),
       });
       const data = await res.json().catch(() => ({}));
 
