@@ -83,7 +83,7 @@
         <div class="cta-row">
           <a class="btn btn-primary" href="#download">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v14M5 9l7 7 7-7"/><path d="M3 20h18"/></svg>
-            Download free
+            Join the beta
           </a>
           <a class="btn btn-ghost" href="#how">See how it works</a>
         </div>
@@ -232,18 +232,27 @@
     <canvas id="dl-scene"></canvas>
     <div class="container narrow download-content">
       <h2 class="dl-title">Ready to graze?</h2>
-      <p class="dl-sub">Free on iPhone. Free on Mac. Nothing leaves your devices.</p>
-      <div class="dl-btns">
-        <!-- TODO: replace href with real App Store URL once approved, e.g. https://apps.apple.com/app/id123456789 -->
-        <a class="btn-dl" href="#app-store" target="_blank" rel="noopener">
-          <svg width="16" height="16" viewBox="0 0 814 1000" fill="currentColor"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.5-148.2-103.9C28.5 714.2 0 603.7 0 497.7c0-234.1 148.2-368.8 294.6-368.8 94.9 0 162.9 54.3 218.9 54.3 53.4 0 137.8-57.5 244.6-57.5 39.4 0 141.8 3.8 208.9 100.3zm-98.7-254.9C642.3 44.6 626.7 3.2 626.7 0c-.6 0-1.3.6-1.9.6C570.4 20.9 515.4 52.5 481 94.9c-31.9 39.5-58.2 101.1-58.2 163.9 0 7.1.6 14.3 1.3 21.4 3.8.6 10.3 1.3 16.8 1.3 52.8 0 111.6-29.5 148.8-72.5 34.5-39.5 60.8-99.1 60.8-163.3 0-5.7-.6-11.4-1.3-17.7z"/></svg>
-          iPhone — App Store
-        </a>
-        <a class="btn-dl btn-dl-mac" href="https://github.com/pasture-sh/pasture/releases/latest/download/Pasture%20for%20Mac.dmg">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v14M5 9l7 7 7-7"/><path d="M3 20h18"/></svg>
-          Mac — Direct download
-        </a>
+      <p class="dl-sub">Beta is open. Get the iOS app via TestFlight and the Mac helper as a direct download.</p>
+
+      <div id="beta-form-wrap">
+        <!-- BETA_WORKER_URL: replace with your deployed Cloudflare Worker URL -->
+        <form class="waitlist-form" id="beta-form" data-worker="BETA_WORKER_URL">
+          <input type="text" name="firstName" placeholder="First name" required autocomplete="given-name" />
+          <input type="email" name="email" placeholder="your@email.com" required autocomplete="email" />
+          <button type="submit">Join beta</button>
+        </form>
       </div>
+
+      <div id="beta-success" hidden>
+        <p class="beta-success-msg">You're in. Check your email for a TestFlight invite from Apple.</p>
+        <div class="dl-btns">
+          <a class="btn-dl btn-dl-mac" href="https://github.com/pasture-sh/pasture/releases/latest/download/Pasture%20for%20Mac.dmg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v14M5 9l7 7 7-7"/><path d="M3 20h18"/></svg>
+            Mac — Download DMG
+          </a>
+        </div>
+      </div>
+
       <p class="dl-small">iOS 17.4+ &nbsp;·&nbsp; macOS 14+</p>
     </div>
   </section>

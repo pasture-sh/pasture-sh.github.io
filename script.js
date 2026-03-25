@@ -79,32 +79,49 @@ revealArray.forEach(el => {
   observer.observe(el);
 });
 
-// ── Waitlist form ─────────────────────────────────────────
+// ── Beta signup form ──────────────────────────────────────
 
-const waitlistForm = document.querySelector('.waitlist-form');
-if (waitlistForm) {
-  waitlistForm.addEventListener('submit', async e => {
+const betaForm    = document.getElementById('beta-form');
+const betaSuccess = document.getElementById('beta-success');
+const betaWrap    = document.getElementById('beta-form-wrap');
+
+if (betaForm) {
+  betaForm.addEventListener('submit', async e => {
     e.preventDefault();
-    const input  = waitlistForm.querySelector('input');
-    const button = waitlistForm.querySelector('button');
-    if (!input.value.trim()) return;
+    const button    = betaForm.querySelector('button');
+    const firstName = betaForm.querySelector('[name="firstName"]').value.trim();
+    const email     = betaForm.querySelector('[name="email"]').value.trim();
+    if (!firstName || !email) return;
 
-    button.textContent = 'Sending…';
+    button.textContent = 'Joining…';
     button.disabled = true;
 
+    const workerUrl = betaForm.dataset.worker;
+
     try {
-      const res = await fetch(waitlistForm.action, {
+      const res = await fetch(workerUrl, {
         method: 'POST',
-        headers: { 'Accept': 'application/json' },
-        body: new FormData(waitlistForm),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, email }),
       });
-      if (res.ok) {
-        button.textContent = '✓ You\'re on the list!';
-        button.style.background = '#617F67';
-        button.style.color = 'white';
-        input.disabled = true;
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.ok) {
+        // Fade out form, reveal success state
+        betaWrap.style.transition = 'opacity 0.3s';
+        betaWrap.style.opacity = '0';
+        setTimeout(() => {
+          betaWrap.hidden = true;
+          betaSuccess.hidden = false;
+          betaSuccess.style.opacity = '0';
+          betaSuccess.style.transition = 'opacity 0.4s';
+          requestAnimationFrame(() => { betaSuccess.style.opacity = '1'; });
+        }, 300);
       } else {
-        button.textContent = 'Try again';
+        const msg = data.error === 'already_registered'
+          ? 'Already registered — check your email for the TestFlight invite.'
+          : 'Something went wrong. Try again.';
+        button.textContent = msg;
         button.disabled = false;
       }
     } catch {
