@@ -855,3 +855,15 @@ a { color: inherit; text-decoration: none; }
   .feature-modal { padding: 12px; }
   .feature-modal-box { padding: 20px; }
 }
+
+@media (max-width: 768px) {
+  .top-nav { display: none; }
+}
+
+/* Smooth theme transition — matches scene.js TRANS_MS = 420 */
+.is-theme-transitioning *,
+.is-theme-transitioning *::before,
+.is-theme-transitioning *::after {
+  transition: background-color 420ms ease, color 420ms ease,
+              border-color 420ms ease, fill 420ms ease !important;
+}

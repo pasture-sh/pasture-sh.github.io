@@ -27,7 +27,9 @@ if (toggleBtn) {
   toggleBtn.addEventListener('click', () => {
     const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     localStorage.setItem(THEME_KEY, next);
+    document.body.classList.add('is-theme-transitioning');
     applyTheme(next);
+    setTimeout(() => document.body.classList.remove('is-theme-transitioning'), 420);
   });
 }
 
