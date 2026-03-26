@@ -1,32 +1,95 @@
 # Pasture
 
-> Pasture is a beautiful iOS app that lets you chat with local AI models running via Ollama on your Mac — from your iPhone. No terminal, no setup, nothing leaves your devices.
+> Pasture is a native iOS app that brings local AI to your iPhone. It connects to Ollama running on your Mac over your local network — with zero configuration, full privacy, and a thoughtfully designed interface. No cloud, no API keys, no data leaving your devices.
 
-## About
+## What it is
 
-Pasture connects your iPhone to Ollama running on your Mac over your local Wi-Fi network using zero-configuration discovery (Bonjour). Conversations are streamed token-by-token and stay entirely on your own hardware.
+Pasture is a free iOS client for Ollama, the open-source local AI runtime for Mac. It pairs your iPhone with your Mac over Wi-Fi using zero-configuration network discovery (Bonjour and Apple's MultipeerConnectivity framework), then streams responses token-by-token from whatever models you have installed in Ollama.
 
-The app is free, private by design, and currently in private beta.
+The iOS app handles conversation, model management, and onboarding. The Mac companion (Pasture for Mac) is a lightweight menu bar app that bridges the iOS app to your local Ollama instance. Both apps are open-source.
+
+## How it works
+
+1. The user installs Ollama on their Mac and Pasture for Mac from a signed, notarized DMG.
+2. They install the Pasture iOS app via TestFlight.
+3. On first launch, the iOS app uses Bonjour service browsing (_pasture._tcp) to find the Mac automatically — no IP addresses, no router configuration.
+4. Pairing state is synced via iCloud (CloudKit), so both devices trust each other without any manual pairing flow.
+5. Once connected, the iOS app fetches the list of installed Ollama models and streams chat completions directly from the Mac.
+
+When Tailscale is installed on both devices, Pasture works identically over VPN — the user can chat with their home Mac from anywhere.
 
 ## Key features
 
-- Zero-config discovery: your Mac appears by name automatically, no IP addresses needed
-- Full streaming chat with every Ollama model installed on your Mac
-- Model manager: browse, download, and delete Ollama models from your iPhone
-- Fully private: no cloud, no API keys, no data leaving your devices
-- Living environments: the UI shifts its look with the time of day
-- Free, always — no subscription or credits required
+- **Zero-config discovery**: the Mac appears by name automatically on the same Wi-Fi network
+- **Full streaming chat**: every Ollama model the user has installed is available
+- **Model manager**: browse, download, and delete Ollama models from the iPhone — no Terminal needed
+- **Tailscale support**: works remotely over a private Tailscale network, same experience as local
+- **Living environments**: the UI shifts its visual atmosphere with the time of day
+- **Fully private**: no cloud backend, no accounts, no analytics, no data leaving the user's devices
+- **Free, always**: no subscription, no in-app purchases, no API credits
+
+## What makes Pasture different
+
+Pasture is the only iOS app that pairs natively with Ollama using automatic local network discovery. There is no need to find an IP address, configure a server URL, or expose any port to the internet. The setup experience is designed to feel like connecting AirPods — open the app and it just works.
+
+The Mac companion runs in the App Sandbox with a Developer ID certificate and Apple notarization, meeting the same security standards as App Store apps. The iOS app uses CloudKit solely for device pairing — no conversation data ever leaves the device.
+
+Pasture is also fully open-source, which means developers can audit the code, contribute features, or build on the same architecture.
 
 ## Requirements
 
-- A Mac running Ollama (ollama.com)
-- iPhone on the same Wi-Fi network
-- iOS 17.4 or later, macOS 14 or later
-- Both devices signed into the same iCloud account
+- Mac running macOS 14 (Sonoma) or later with Ollama installed
+- iPhone running iOS 17.4 or later
+- Both devices on the same Wi-Fi network (or connected via Tailscale)
+- An iCloud account on both devices (used only for pairing, not for data storage)
+
+## Availability
+
+- **iOS app**: open beta via TestFlight — sign up at https://pasture.sh
+- **Mac companion**: direct download (signed DMG) at https://github.com/pasture-sh/pasture/releases/latest/download/PastureHelper.dmg
+- **Source code**: https://github.com/pasture-sh/pasture
+
+## Frequently asked questions
+
+**Does Pasture require an internet connection?**
+No. Once set up, Pasture works entirely on the local network. An internet connection is only needed to download models into Ollama, and briefly for iCloud pairing on first setup.
+
+**Can I use Pasture with any Ollama model?**
+Yes. Pasture lists every model currently installed in Ollama on the Mac. The user can also download new models — including Llama, Mistral, Gemma, Phi, Qwen, DeepSeek, and any other model in the Ollama library — directly from the iOS app.
+
+**Does Ollama need to be running when I open Pasture?**
+Yes. Pasture connects to a running Ollama instance. The Mac companion app handles keeping the connection alive and surfaces the Ollama status in the menu bar.
+
+**Does Pasture work from outside my home network?**
+Yes, with Tailscale. Tailscale creates a private encrypted network between the user's devices. Pasture detects Tailscale automatically and connects through it without any additional configuration.
+
+**Is there an Android version?**
+Not currently. Pasture is iOS and macOS only.
+
+**Why is the Mac app distributed as a DMG instead of through the Mac App Store?**
+The Mac App Store's sandboxing policies restrict the kind of local network access Pasture needs. The DMG is signed with an Apple Developer ID and notarized by Apple, so macOS accepts it without security warnings.
+
+**Is Pasture open-source?**
+Yes. The full source code for both the iOS and Mac apps is available at https://github.com/pasture-sh/pasture. Contributions and bug reports are welcome.
+
+**How do I report a bug?**
+Use the "Report a Problem" button in TestFlight (captures logs automatically), or email hi@pasture.sh with a description and any screenshots or logs.
+
+## Technical stack
+
+- Swift 6.0 with strict concurrency throughout
+- MultipeerConnectivity + Bonjour for local network discovery
+- CloudKit (via Loom — https://github.com/EthanLipnik/Loom) for device pairing sync
+- App Sandbox and Hardened Runtime on macOS
+- XcodeGen for Xcode project generation (https://github.com/yonaskolb/XcodeGen)
+- Markdown rendering via swift-markdown-ui (https://github.com/gonzalezreal/swift-markdown-ui)
 
 ## Links
 
 - Homepage: https://pasture.sh
+- Source code: https://github.com/pasture-sh/pasture
+- Mac app download: https://github.com/pasture-sh/pasture/releases/latest/download/PastureHelper.dmg
+- iOS beta signup: https://pasture.sh
 - Privacy policy: https://pasture.sh/privacy
+- Bug reports / feedback: hi@pasture.sh
 - Developer: https://x.com/amrith
-- Built with Ollama (https://ollama.com) and Loom (https://github.com/EthanLipnik/Loom)
