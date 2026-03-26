@@ -59,7 +59,7 @@ window.addEventListener('scroll', () => {
 // ── Scroll reveal ─────────────────────────────────────────
 
 const revealArray = Array.from(document.querySelectorAll(
-  '.step, .feature-card, .req-list li, .section-title, .section-eyebrow'
+  '.step, .feature-card, .req-list li, .section-title, .section-eyebrow, .faq-item'
 ));
 
 const observer = new IntersectionObserver(
