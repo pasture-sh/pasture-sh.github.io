@@ -863,6 +863,7 @@ a { color: inherit; text-decoration: none; }
 /* ── FAQ ──────────────────────────────────────────────────────────────────── */
 
 .faq { background: var(--surface-alt); text-align: left; }
+.faq .container { margin-left: 0; }
 
 .faq-oss {
   display: inline-flex;
